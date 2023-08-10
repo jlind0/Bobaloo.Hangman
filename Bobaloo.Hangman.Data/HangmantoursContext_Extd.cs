@@ -15,7 +15,7 @@ public partial class HangmantoursContext : DbContext
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(Configuration["HangmanToursConnectionString"]);
+        => optionsBuilder.UseSqlServer(Configuration["HangmanToursConnectionString"], x => x.UseNetTopologySuite());
 
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
@@ -25,6 +25,7 @@ public partial class HangmantoursContext : DbContext
             entity.Property(e => e.StartingPoint)
                 .HasColumnType("geography")
                 .HasConversion(v => v, v => v);
+            entity.Ignore(e => e.PrimaryKey);
         });
 
         modelBuilder.Entity<TourLeg>(entity =>
@@ -32,6 +33,11 @@ public partial class HangmantoursContext : DbContext
             entity.Property(e => e.Waypoint)
                 .HasColumnType("geography")
                 .HasConversion(v => v, v => v);
+            entity.Ignore(e => e.PrimaryKey);
+        });
+        modelBuilder.Entity<VoiceActor>(entity =>
+        {
+            entity.Ignore(e => e.PrimaryKey);
         });
     }
 }

@@ -4,10 +4,24 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<table>
+    <thead>
+        <tr>
+            <th>Tour</th>
+            <th>Price</th>
+        </tr>
+        
+    </thead>
+    <tbody>
+        @foreach (var tour in Model.Tours)
+        {
+            <tr>
+                <td>@tour.Name</td>
+                <td>@tour.Price.ToString("c")</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 <div>Graph API result</div>
 <div>@ViewData["GraphApiResult"]</div>

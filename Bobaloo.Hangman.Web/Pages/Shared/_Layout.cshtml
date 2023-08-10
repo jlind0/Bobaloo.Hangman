@@ -42,11 +42,14 @@
             &copy; 2023 - Bobaloo.Hangman.Web - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
     </footer>
-
+    <script type="text/javascript">
+        var exports = {};
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
+    <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=ArIhGztSuytBopHCV1QFqR7Oze-s9xd94vmW9d_EoFv0GjdQQyH2fe7jEpo1-zfF' async defer></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

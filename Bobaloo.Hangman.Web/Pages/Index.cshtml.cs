@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Web;
 using System.Net;
 using Microsoft.Graph;
+using Bobaloo.Hangman.Data;
+using Bobaloo.Hangman.Data.Core;
 
 namespace Bobaloo.Hangman.Web.Pages
 {
@@ -11,15 +13,19 @@ namespace Bobaloo.Hangman.Web.Pages
     {
         private readonly GraphServiceClient _graphServiceClient;
         private readonly ILogger<IndexModel> _logger;
-
-        public IndexModel(ILogger<IndexModel> logger, GraphServiceClient graphServiceClient)
+        private readonly IRepository<HangmanUnitOfWork, Tour, Guid> _toursRepository;
+        public IEnumerable<Tour> Tours { get; set; }
+        public IndexModel(ILogger<IndexModel> logger, GraphServiceClient graphServiceClient,
+            IRepository<HangmanUnitOfWork, Tour, Guid> toursRepository)
         {
             _logger = logger;
-            _graphServiceClient = graphServiceClient;;
+            _graphServiceClient = graphServiceClient;
+            _toursRepository = toursRepository;
         }
 
-        public async Task OnGet()
+        public async Task OnGet(CancellationToken token = default)
         {
+            Tours = await _toursRepository.Get(token: token);
             var user = await _graphServiceClient.Me.Request().GetAsync();;
             ViewData["GraphApiResult"] = user.DisplayName;;
 

@@ -1,3 +1,5 @@
+using Bobaloo.Hangman.Data;
+using Bobaloo.Hangman.Data.Core;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
@@ -21,9 +23,12 @@ builder.Services.AddAuthorization(options =>
     // By default, all incoming requests will be authorized according to the default policy.
     options.FallbackPolicy = options.DefaultPolicy;
 });
+builder.Services.AddSingleton<IContextFactory, ContextFactory>();
+builder.Services.AddScoped<IRepository<HangmanUnitOfWork, Tour, Guid>, Repository<Tour, Guid>>();
+builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourLeg, Guid>, Repository<TourLeg, Guid>>();
+builder.Services.AddControllers();
 builder.Services.AddRazorPages()
     .AddMicrosoftIdentityUI();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
