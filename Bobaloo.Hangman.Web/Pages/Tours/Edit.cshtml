@@ -9,6 +9,7 @@
         <form method="post">
             <input type="hidden" asp-for="Longitude" />
             <input type="hidden" asp-for="Latitude" />
+            <input type="hidden" asp-for="Tour.TourId"/>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Tour.Name" class="control-label"></label>
@@ -33,29 +34,37 @@
                 <input type="submit" value="Update" class="btn btn-primary" />
             </div>
             <div class="form-group">
-                <div id="map" style="width: 800px; height: 600px;"></div>
+                <a href="~/api/AudioFile/Tours/@Model.Tour.TourId" target="_blank">Intro Audio</a>
             </div>
+
         </form>
     </div>
     <div id="myMap" style='position:relative;width:600px;height:400px;'></div>
-</div>
-<div class="row">
-    <div class="col-md-4">
+    <div class="col-md-4" id="TTSEditor">
         <div class="form-group">
-            <select id="ddlModel" asp-items="Model.VoiceActors"></select>
-            <textarea id="txtTTS"></textarea>
-            <input type="button" id="btnAddTTS" value="Request TTS" />
+            <select asp-items="Model.VoiceActors" data-bind="value:selectedTTSModel"></select>
+            <textarea id="txtTTS" data-bind="value: ttsText"></textarea>
+            <label>Append</label>
+            <input type="checkbox" data-bind="value: ttsAppend"></input>
+            <button data-bind="click: submitRequest">Submit for TTS</button>
         </div>
-    </div>
-    <div class="col-md-4">
-        <ul id="polls">
-
+        <ul data-bind="foreach: pollNotices">
+            <li>
+                <span data-bind="text:state.job_token"></span>
+                <span data-bind="text: state.status"></span>
+                <span data-bind="text: state.created_at"></span>
+                <span data-bind="if: state.maybe_public_bucket_wav_audio_path">
+                    <a target="_blank" data-bind="text: state.title, attr: { href: 'https://storage.googleapis.com/vocodes-public' + state.maybe_public_bucket_wav_audio_path }"></a>
+                </span>
+            </li>
         </ul>
     </div>
 </div>
 
+
 @section Scripts{
     <script type="text/javascript" src="~/js/scripts/EditTour.js"></script>
     <script type="text/javascript" src="~/js/scripts/TTSHubClient.js"></script>
+    <script type="text/javascript" src="~/js/scripts/EditViewModel.js"></script>
 
 }

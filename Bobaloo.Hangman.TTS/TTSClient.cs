@@ -111,6 +111,7 @@ namespace Bobaloo.Hangman.TTS
 
         public virtual async Task<ISourceBlock<InferencePollResponse>> SubmitRequest(string text, string model, CancellationToken token = default)
         {
+            text = text.Trim();
             BroadcastBlock<InferencePollResponse> block = new BroadcastBlock<InferencePollResponse>(p => p, new DataflowBlockOptions()
             {
                 CancellationToken = token
