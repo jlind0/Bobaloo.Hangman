@@ -3,11 +3,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var map;
 var wayPointPin;
 function GetMap() {
-    map = new Microsoft.Maps.Map('#myMap', {});
-    var lat = Number($("#Latitude").val());
-    var long = Number($("#Longitude").val());
-    wayPointPin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long));
-    map.entities.push(wayPointPin);
+    var latStr = $("#Latitude").val();
+    var longStr = $("#Longitude").val();
+    var options = {};
+    if (latStr !== '' && longStr !== '') {
+        var lat = Number(latStr);
+        var long = Number(longStr);
+        options.bounds = Microsoft.Maps.LocationRect.fromEdges(lat + 0.001, long - 0.001, lat - 0.001, long + 0.001);
+        wayPointPin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long));
+    }
+    map = new Microsoft.Maps.Map('#myMap', options);
+    if (wayPointPin !== undefined)
+        map.entities.push(wayPointPin);
     Microsoft.Maps.Events.addHandler(map, 'click', addWaypoint);
 }
 function addWaypoint(e) {
@@ -21,4 +28,3 @@ function addWaypoint(e) {
     // Add the pushpin to the map
     map.entities.push(wayPointPin);
 }
-//# sourceMappingURL=EditTour.js.map

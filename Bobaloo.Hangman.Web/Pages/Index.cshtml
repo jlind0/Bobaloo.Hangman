@@ -16,7 +16,7 @@
         @foreach (var tour in Model.Tours)
         {
             <tr>
-                <td>@tour.Name</td>
+                <td><a href="./Tours/Edit/@tour.TourId">@tour.Name</a></td>
                 <td>@tour.Price.ToString("c")</td>
             </tr>
         }

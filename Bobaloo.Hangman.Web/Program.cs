@@ -1,5 +1,7 @@
 using Bobaloo.Hangman.Data;
 using Bobaloo.Hangman.Data.Core;
+using Bobaloo.Hangman.TTS;
+using Bobaloo.Hangman.Web.Hubs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
@@ -26,6 +28,9 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddSingleton<IContextFactory, ContextFactory>();
 builder.Services.AddScoped<IRepository<HangmanUnitOfWork, Tour, Guid>, Repository<Tour, Guid>>();
 builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourLeg, Guid>, Repository<TourLeg, Guid>>();
+builder.Services.AddScoped<IRepository<HangmanUnitOfWork, VoiceActor, int>, Repository<VoiceActor, int>>();
+builder.Services.AddSingleton<ITTSCleint, FakeYouClient>();
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddRazorPages()
     .AddMicrosoftIdentityUI();
@@ -50,5 +55,5 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers();
-
+app.MapHub<TTSHub>("/hubs/tts");
 app.Run();

@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\scripts\AddTour.js" />
+    <None Include="wwwroot\scripts\EditTour.js" />
+    <None Include="wwwroot\scripts\TTSHubClient.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.9" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.10">
@@ -37,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Update="scripts\AddTour.ts">
+    <TypeScriptCompile Update="wwwroot\scripts\AddTour.ts">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </TypeScriptCompile>
   </ItemGroup>

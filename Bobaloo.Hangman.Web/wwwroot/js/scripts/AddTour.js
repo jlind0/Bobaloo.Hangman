@@ -17,4 +17,3 @@ function addWaypoint(e) {
     // Add the pushpin to the map
     map.entities.push(wayPointPin);
 }
-//# sourceMappingURL=AddTour.js.map

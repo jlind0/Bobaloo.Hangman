@@ -175,8 +175,7 @@ namespace Bobaloo.Hangman.Data
         {
             return Use((w, t) =>
             {
-                w.Context.Attach(entity);
-                w.Context.Entry(entity).State = EntityState.Modified;
+                w.Context.Update(entity);
                 return Task.CompletedTask;
             }, work, token, true);
         }
