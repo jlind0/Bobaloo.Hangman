@@ -15,7 +15,8 @@ namespace Bobaloo.Hangman.TTS
 {
     public interface IGoogleStorageClient
     {
-        Task<byte[]> FetchAudio(string fileName, byte[]? oldData = null, CancellationToken token = default);
+        Task<byte[]> FetchAudio(string fileName, CancellationToken token = default);
+        Task<byte[]> CombineAudio(string newFileName, byte[] oldAudio, CancellationToken token = default);
     }
     public class GoogleStorageClient : IGoogleStorageClient
     {
@@ -29,7 +30,7 @@ namespace Bobaloo.Hangman.TTS
             var client = new HttpClient();
             return client;
         }
-        public async Task<byte[]> FetchAudio(string fileName, byte[]? oldData = null, CancellationToken token = default)
+        public async Task<byte[]> FetchAudio(string fileName, CancellationToken token = default)
         {
             byte[] newData;
             using (var ms = new MemoryStream())
@@ -53,20 +54,21 @@ namespace Bobaloo.Hangman.TTS
                     }
                 }
             }
-            if (oldData == null)
-                return newData;
-            using var msOld = new MemoryStream(oldData);
-            using var msNew = new MemoryStream(newData);
-            using var mp3Old = new Mp3FileReader(msOld);
-            using var mp3New = new Mp3FileReader(msNew);
-            using (var outputMemoryStream = new MemoryStream())
-            using (var writer = new LameMP3FileWriter(outputMemoryStream, mp3Old.WaveFormat, LAMEPreset.STANDARD))
-            {
-                await mp3Old.CopyToAsync(writer, token);
-                await mp3New.CopyToAsync(writer, token);
-                return outputMemoryStream.ToArray();
-            }
+            return newData;
         }
 
+        public async Task<byte[]> CombineAudio(string newFileName, byte[] oldAudio, CancellationToken token = default)
+        {
+            var newAudio = await FetchAudio(newFileName, token);
+            using var msOld = new MemoryStream(oldAudio);
+            using var msNew = new MemoryStream(newAudio);
+            using var mp3Old = new Mp3FileReader(msOld);
+            using var mp3New = new Mp3FileReader(msNew);
+            using var outputMemoryStream = new MemoryStream();
+            using var writer = new LameMP3FileWriter(outputMemoryStream, mp3Old.WaveFormat, LAMEPreset.STANDARD);
+            await mp3Old.CopyToAsync(writer, token);
+            await mp3New.CopyToAsync(writer, token);
+            return outputMemoryStream.ToArray();
+        }
     }
 }

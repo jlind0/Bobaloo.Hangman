@@ -39,8 +39,13 @@ namespace Bobaloo.Hangman.Web.Hubs
                         tour = await TourRepository.GetByID(tourId, token: Context.ConnectionAborted);
                     if (tour != null)
                     {
-                        tour.IntroductionAudio = await GoogleStoargeClient.FetchAudio(
-                            resp.state.maybe_public_bucket_wav_audio_path, append ? tour.IntroductionAudio : null, Context.ConnectionAborted);
+                        if (append && tour.IntroductionAudio != null)
+                            tour.IntroductionAudio = await GoogleStoargeClient.CombineAudio(
+                                resp.state.maybe_public_bucket_wav_audio_path,
+                                tour.IntroductionAudio, Context.ConnectionAborted);
+                        else
+                            tour.IntroductionAudio = await GoogleStoargeClient.FetchAudio(
+                                resp.state.maybe_public_bucket_wav_audio_path, Context.ConnectionAborted);
                         await TourRepository.Update(tour, token: Context.ConnectionAborted);
                     }
                 }
