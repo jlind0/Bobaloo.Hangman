@@ -1,0 +1,41 @@
+﻿@page "/"
+@using Bobaloo.Hangman.Data.Core
+@using Bobaloo.Hangman.Data
+@inject IRepository<HangmanUnitOfWork, Tour, Guid> TourRepository
+
+<PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
+
+<h1>Tours</h1>
+
+@if(Tours == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tour in Tours)
+            {
+                <tr>
+                  <td><a href="/tours/@tour.TourId">@tour.Name</a></td>
+                  <td>@tour.Price.ToString("c")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+}
+@code{
+    IEnumerable<Tour>? Tours;
+    protected override async Task OnInitializedAsync()
+    {
+        Tours = await TourRepository.Get();
+    }
+}

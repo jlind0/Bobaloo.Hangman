@@ -1,7 +1,7 @@
 ﻿/// <reference path="../../node_modules/@microsoft/signalr/dist/esm/browser-index.d.ts" />
 /// <reference path="../../node_modules/@types/jquery/index.d.ts" />
 declare var exports: any;
-namespace Bobaloo.SignalR {
+export module Bobaloo.SignalR {
     export class TTSHub {
         public connection?: signalR.HubConnection;
         constructor() { }

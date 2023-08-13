@@ -5,11 +5,13 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Web", "Bobaloo.Hangman.Web\Bobaloo.Hangman.Web.csproj", "{C6BF584F-7DB8-4D01-9A83-94C6A6F82890}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bobaloo.Hangman.Data.Core", "Bobaloo.Hangman.Data.Core\Bobaloo.Hangman.Data.Core.csproj", "{9F381AAE-B295-41DD-8C1A-C8379098B3EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Data.Core", "Bobaloo.Hangman.Data.Core\Bobaloo.Hangman.Data.Core.csproj", "{9F381AAE-B295-41DD-8C1A-C8379098B3EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bobaloo.Hangman.TTS", "Bobaloo.Hangman.TTS\Bobaloo.Hangman.TTS.csproj", "{AB3613C8-ABD3-41C7-96A0-0ABBE89C6089}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.TTS", "Bobaloo.Hangman.TTS\Bobaloo.Hangman.TTS.csproj", "{AB3613C8-ABD3-41C7-96A0-0ABBE89C6089}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bobaloo.Hangman.Data", "Bobaloo.Hangman.Data\Bobaloo.Hangman.Data.csproj", "{98773329-6FA3-44FA-9ED8-2112828E4C7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Data", "Bobaloo.Hangman.Data\Bobaloo.Hangman.Data.csproj", "{98773329-6FA3-44FA-9ED8-2112828E4C7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bobaloo.Hangman.Web.Blazor", "Bobaloo.Hangman.Web.Blazor\Bobaloo.Hangman.Web.Blazor.csproj", "{9C5A5A8D-707F-46BF-B8FC-7D140A9B237E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{98773329-6FA3-44FA-9ED8-2112828E4C7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98773329-6FA3-44FA-9ED8-2112828E4C7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98773329-6FA3-44FA-9ED8-2112828E4C7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C5A5A8D-707F-46BF-B8FC-7D140A9B237E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C5A5A8D-707F-46BF-B8FC-7D140A9B237E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C5A5A8D-707F-46BF-B8FC-7D140A9B237E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C5A5A8D-707F-46BF-B8FC-7D140A9B237E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

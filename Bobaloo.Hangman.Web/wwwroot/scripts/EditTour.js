@@ -3,16 +3,14 @@ var wayPointPin;
 function GetMap() {
     var latStr = $("#Latitude").val();
     var longStr = $("#Longitude").val();
-    var box = undefined;
+    var options = {};
     if (latStr !== '' && longStr !== '') {
         var lat = Number(latStr);
         var long = Number(longStr);
-        box = Microsoft.Maps.LocationRect.fromEdges(lat + 0.001, long - 0.001, lat - 0.001, long + 0.001);
+        options.bounds = Microsoft.Maps.LocationRect.fromEdges(lat + 0.001, long - 0.001, lat - 0.001, long + 0.001);
         wayPointPin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long));
     }
-    map = new Microsoft.Maps.Map('#myMap', {
-        bounds: box
-    });
+    map = new Microsoft.Maps.Map('#myMap', options);
     if (wayPointPin !== undefined)
         map.entities.push(wayPointPin);
     Microsoft.Maps.Events.addHandler(map, 'click', addWaypoint);

@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "outDir": "./wwwroot/js",
+    "target": "ES6",
+    "outDir": "./wwwroot/",
     "rootDir": "./wwwroot",
-    "module": "CommonJS",
+    "module": "ES6",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "lib": [ "ES5", "DOM" ],
+    "lib": [ "ES6", "DOM" ],
     "moduleResolution": "Node"
   },
   "include": [ "wwwroot/scripts/**/*.ts" ],
