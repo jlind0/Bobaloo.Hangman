@@ -26,30 +26,34 @@ namespace Bobaloo.Hangman.Web.Hubs
         }
         public async Task SubmitTTSForTour(Guid tourId, string text, string model, bool append = false)
         {
-            TourWithBinaryData? tour = null;
-            if(append)
-                tour = await TourRepository.GetByID(tourId, token: Context.ConnectionAborted);
+            
 
             var block = await TTSClient.SubmitRequest(text, model, Context.ConnectionAborted);
             var actionBlock = new ActionBlock<InferencePollResponse>(async resp =>
             {
-                if(resp.state.maybe_public_bucket_wav_audio_path != null)
+                try
                 {
-                    if(tour == null)
-                        tour = await TourRepository.GetByID(tourId, token: Context.ConnectionAborted);
-                    if (tour != null)
+                    if (resp.state.maybe_public_bucket_wav_audio_path != null)
                     {
-                        if (append && tour.IntroductionAudio != null)
-                            tour.IntroductionAudio = await GoogleStoargeClient.CombineAudio(
-                                resp.state.maybe_public_bucket_wav_audio_path,
-                                tour.IntroductionAudio, Context.ConnectionAborted);
-                        else
-                            tour.IntroductionAudio = await GoogleStoargeClient.FetchAudio(
-                                resp.state.maybe_public_bucket_wav_audio_path, Context.ConnectionAborted);
-                        await TourRepository.Update(tour, token: Context.ConnectionAborted);
+                        var tour = await TourRepository.GetByID(tourId, token: Context.ConnectionAborted);
+                        if (tour != null)
+                        {
+                            if (append && tour.IntroductionAudio != null)
+                                tour.IntroductionAudio = await GoogleStoargeClient.CombineAudio(
+                                    resp.state.maybe_public_bucket_wav_audio_path,
+                                    tour.IntroductionAudio, Context.ConnectionAborted);
+                            else
+                                tour.IntroductionAudio = await GoogleStoargeClient.FetchAudio(
+                                    resp.state.maybe_public_bucket_wav_audio_path, Context.ConnectionAborted);
+                            await TourRepository.Update(tour, token: Context.ConnectionAborted);
+                        }
                     }
+                    await Clients.Caller.SendAsync("recievePoll", resp, Context.ConnectionAborted);
                 }
-                await Clients.Caller.SendAsync("recievePoll", resp, Context.ConnectionAborted);
+                catch(Exception ex)
+                {
+                    throw;
+                }
             });
             block.LinkTo(actionBlock);
             await block.Completion;

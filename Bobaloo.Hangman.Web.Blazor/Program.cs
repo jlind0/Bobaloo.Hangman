@@ -1,7 +1,6 @@
 using Bobaloo.Hangman.Data.Core;
 using Bobaloo.Hangman.Data;
 using Bobaloo.Hangman.TTS;
-using Bobaloo.Hangman.Web.Blazor.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -40,7 +39,7 @@ builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourLeg, Guid>, Reposi
 builder.Services.AddScoped<IRepository<HangmanUnitOfWork, VoiceActor, int>, Repository<VoiceActor, int>>();
 builder.Services.AddSingleton<ITTSCleint, FakeYouClient>();
 builder.Services.AddSingleton<IGoogleStorageClient, GoogleStorageClient>();
-
+builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -50,13 +49,15 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.MapBlazorHub();
 app.MapHub<TTSHub>("/hubs/tts");

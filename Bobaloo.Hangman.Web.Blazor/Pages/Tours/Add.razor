@@ -1,20 +1,24 @@
 ﻿@page "/tours/add"
+@attribute [Authorize]
 @using Bobaloo.Hangman.Data.Core
 @using Bobaloo.Hangman.Data
+@using NetTopologySuite.Geometries
 @inject IRepository<HangmanUnitOfWork, Tour, Guid> TourRepository
 @inject NavigationManager NavManager
+@inject IJSRuntime JSRun
 <PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
 
 <EditForm Model="tour" OnValidSubmit="AddTour">
     <DataAnnotationsValidator />
-
+    <input type="hidden" value="@Latitude" id="Latitude" />
+    <input type="hidden" value="@Longitude" id="Longitude" />
     <div class="form-group">
         <label for="Name">Name</label>
         <InputText id="Name" @bind-Value="tour.Name" />
         <ValidationMessage For="@(() => tour.Name)" />
     </div>
     <div class="form-group">
-        <label for="Name">Name</label>
+        <label for="Name">Description</label>
         <InputTextArea id="Name" @bind-Value="tour.Description" />
         <ValidationMessage For="@(() => tour.Description)" />
     </div>
@@ -26,12 +30,41 @@
 
     <button type="submit" class="btn btn-primary">Save</button>
 </EditForm>
+<div id="myMap" style="width: 100%; height: 400px;"></div>
 
 @code{
     Tour tour = new Tour();
+    double? Latitude;
+    double? Longitude;
     private async Task AddTour()
     {
+        if (Latitude != null && Longitude != null)
+            tour.StartingPoint = new Point(Latitude.Value, Longitude.Value)
+            {
+                    SRID = 4326
+            };
         await TourRepository.Add(tour);
         NavManager.NavigateTo($"/tours/{tour.TourId}");
+        
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            var dotNetReference = DotNetObjectReference.Create(this);
+            await JSRun.InvokeVoidAsync("SetDotNetObject", dotNetReference);
+        }
+    }
+    [JSInvokable("ConfigureMap")]
+    public async Task ConfigureMap()
+    {
+        await JSRun.InvokeVoidAsync("GetMapForAddTour");
+    }
+    [JSInvokable("UpdateLatLong")]
+    public async Task UpdateLatLong(double lat, double lon)
+    {
+        Latitude = lat;
+        Longitude = lon;
     }
 }

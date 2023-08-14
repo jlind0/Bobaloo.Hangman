@@ -1,12 +1,23 @@
 ﻿@page "/tours/{tourId}"
+@attribute [Authorize]
 @using Bobaloo.Hangman.Data.Core
 @using Bobaloo.Hangman.Data
+@using NetTopologySuite.Geometries;
+@using Microsoft.AspNetCore.SignalR.Client
+@using Bobaloo.Hangman.TTS
+@using System.ComponentModel.DataAnnotations;
 @inject IRepository<HangmanUnitOfWork, Tour, Guid> TourRepository
 @inject NavigationManager NavManager
+@inject IJSRuntime JSRun
+@inject IHttpContextAccessor Context
+@inject IRepository<HangmanUnitOfWork, VoiceActor, int> VoiceActorRepository
+@implements IAsyncDisposable
 <PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
 @if (tour != null)
 {
     <EditForm Model="tour" OnValidSubmit="UpdateTour">
+        <input type="hidden" value="@Latitude" id="Latitude" />
+        <input type="hidden" value="@Longitude" id="Longitude" />
         <DataAnnotationsValidator />
 
         <div class="form-group">
@@ -27,6 +38,46 @@
 
         <button type="submit" class="btn btn-primary">Save</button>
     </EditForm>
+    <a href="/api/audio/tours/@TourId" target="_blank">Listen to Intro Audio</a>
+    <div id="myMap" style="width: 100%; height: 400px;"></div>
+    <EditForm Model="Request" OnValidSubmit="RequestTTS">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label for="Text">Text</label>
+            <InputTextArea id="Text" @bind-Value="Request.Text" />
+            <ValidationMessage For="@(() => Request.Text)" />
+        </div>
+        <div class="form-group">
+            <label for="Model">Model</label>
+             <InputSelect id="Model" @bind-Value="Request.Model">
+                 <option value="">Select a Model</option>
+                @foreach(var actor in VoiceActors)
+                {
+                    <option value="@actor.FakeYouModelName">@actor.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Request.Model)" />
+        </div>
+        <div class="form-group">
+            <label for="Append">Append</label>
+            <InputCheckbox id="Append" @bind-Value="Request.Append"/>
+        </div>
+        <button type="submit" class="btn btn-primary">Request TTS</button>
+    </EditForm>
+    <ul>
+        @foreach(var poll in Polls)
+        {
+            <li>
+                <b>@poll.state.status</b> : @poll.state.title 
+                @if(!string.IsNullOrEmpty(poll.state.maybe_public_bucket_wav_audio_path))
+                {
+                    string url = "https://storage.googleapis.com/vocodes-public" + poll.state.maybe_public_bucket_wav_audio_path;
+                    <a target="_blank" href="@url">Listen</a>
+                }
+            </li>
+        }
+    </ul>
+    
 }
 else
 {
@@ -34,14 +85,91 @@ else
 }
 
 @code{
-    [Parameter] public string TourId { get; set; } 
+    public class TTSRequest
+    {
+        [Required(AllowEmptyStrings = false)]
+        public string Text { get; set; } = null!;
+        [Required(AllowEmptyStrings = false)]
+        public string Model{ get; set; } = null!;
+        public bool Append { get; set; } = false;
+    }
+    [Parameter] public string TourId { get; set; } = null!;
+    private HubConnection? hubConnection;
+    private List<InferencePollResponse> Polls = new List<InferencePollResponse>();
+    public TTSRequest Request = new TTSRequest();
     Tour? tour;
+    double? Latitude;
+    double? Longitude;
+    IEnumerable<VoiceActor> VoiceActors = new List<VoiceActor>();
+    bool isInited = false;
     protected override async Task OnInitializedAsync()
     {
         tour = await TourRepository.GetByID(Guid.Parse(TourId));
+        VoiceActors = await VoiceActorRepository.Get();
+        Latitude = tour?.StartingPoint?.X;
+        Longitude = tour?.StartingPoint?.Y;
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavManager.ToAbsoluteUri("/hubs/tts"), options =>
+            {
+                var container = new System.Net.CookieContainer();
+                foreach (var item in Context.HttpContext?.Request.Cookies ?? throw new InvalidOperationException())
+                {
+                    container.Add(new System.Net.Cookie(item.Key, item.Value) { Domain = Context.HttpContext.Request.Host.Host, HttpOnly = true });
+                }
+                options.Cookies = container;
+            })
+            .Build();
+
+        hubConnection.On<InferencePollResponse>("recievePoll", poll =>
+        {
+            Polls.Add(poll);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+        isInited = true;
+    }
+    public async Task RequestTTS()
+    {
+        if(hubConnection != null)
+            await hubConnection.SendAsync("SubmitTTSForTour", TourId, Request.Text, Request.Model, Request.Append);
     }
     private async Task UpdateTour()
     {
+        if(tour != null && Longitude != null && Latitude != null)
+            tour.StartingPoint = new Point(Latitude.Value, Longitude.Value)
+                {
+                    SRID = 4326
+                };
         await TourRepository.Update(tour ?? throw new InvalidOperationException());
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            var dotNetReference = DotNetObjectReference.Create(this);
+            await JSRun.InvokeVoidAsync("SetDotNetObject", dotNetReference);
+        }
+    }
+    [JSInvokable("ConfigureMap")]
+    public async Task ConfigureMap()
+    {
+        while (!isInited)
+            await Task.Delay(100);
+        await JSRun.InvokeVoidAsync("GetMapForEditTour");
+    }
+    [JSInvokable("UpdateLatLong")]
+    public async Task UpdateLatLong(double lat, double lon)
+    {
+        Latitude = lat;
+        Longitude = lon;
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
     }
 }

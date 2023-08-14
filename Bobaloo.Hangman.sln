@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Web", "Bobaloo.Hangman.Web\Bobaloo.Hangman.Web.csproj", "{C6BF584F-7DB8-4D01-9A83-94C6A6F82890}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Data.Core", "Bobaloo.Hangman.Data.Core\Bobaloo.Hangman.Data.Core.csproj", "{9F381AAE-B295-41DD-8C1A-C8379098B3EE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.TTS", "Bobaloo.Hangman.TTS\Bobaloo.Hangman.TTS.csproj", "{AB3613C8-ABD3-41C7-96A0-0ABBE89C6089}"
@@ -19,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C6BF584F-7DB8-4D01-9A83-94C6A6F82890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C6BF584F-7DB8-4D01-9A83-94C6A6F82890}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C6BF584F-7DB8-4D01-9A83-94C6A6F82890}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C6BF584F-7DB8-4D01-9A83-94C6A6F82890}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9F381AAE-B295-41DD-8C1A-C8379098B3EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9F381AAE-B295-41DD-8C1A-C8379098B3EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F381AAE-B295-41DD-8C1A-C8379098B3EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
