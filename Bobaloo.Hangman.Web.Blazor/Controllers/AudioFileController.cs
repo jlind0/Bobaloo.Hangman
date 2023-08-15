@@ -13,9 +13,12 @@ namespace Bobaloo.Hangman.Web.Controllers
     public class AudioController : ControllerBase
     {
         protected IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid> TourRepository { get; }
-        public AudioController(IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid> tourRepository)
+        protected IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid> TourLegRepository { get; }
+        public AudioController(IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid> tourRepository, 
+            IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid> tourLegRepostory)
         {
             TourRepository = tourRepository;
+            TourLegRepository = tourLegRepostory;
         }
 
         [HttpGet("tours/{tourId}")]
@@ -24,6 +27,14 @@ namespace Bobaloo.Hangman.Web.Controllers
             var tour = await TourRepository.GetByID(tourId, token: token);
             if(tour != null && tour.IntroductionAudio != null)
                 return File(tour.IntroductionAudio, "audio/mpeg");
+            return NotFound();
+        }
+        [HttpGet("tours/legs/{tourLegId}")]
+        public async Task<IActionResult> GetTourLegAudio(Guid tourLegId, CancellationToken token = default)
+        {
+            var tourLeg = await TourLegRepository.GetByID(tourLegId, token: token);
+            if (tourLeg != null && tourLeg.Audio != null)
+                return File(tourLeg.Audio, "audio/mpeg");
             return NotFound();
         }
     }

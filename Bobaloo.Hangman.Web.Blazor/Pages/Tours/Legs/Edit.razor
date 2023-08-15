@@ -1,4 +1,4 @@
-﻿@page "/tours/{tourId}"
+﻿@page "/tours/legs/{tourLegId}"
 @attribute [Authorize]
 @using Bobaloo.Hangman.Data.Core
 @using Bobaloo.Hangman.Data
@@ -6,7 +6,6 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Bobaloo.Hangman.TTS
 @using System.ComponentModel.DataAnnotations;
-@inject IRepository<HangmanUnitOfWork, Tour, Guid> TourRepository
 @inject IRepository<HangmanUnitOfWork, TourLeg, Guid> TourLegRepository
 @inject NavigationManager NavManager
 @inject IJSRuntime JSRun
@@ -14,40 +13,31 @@
 @inject IRepository<HangmanUnitOfWork, VoiceActor, int> VoiceActorRepository
 @implements IAsyncDisposable
 <PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
-@if (tour != null)
+@if (tourLeg != null)
 {
-    <EditForm Model="tour" OnValidSubmit="UpdateTour">
+    <a href="/tours/@tourLeg.TourLegId">@tourLeg.Tour.Name</a>
+    <EditForm Model="tourLeg" OnValidSubmit="UpdateTourLeg">
         <input type="hidden" value="@Latitude" id="Latitude" />
         <input type="hidden" value="@Longitude" id="Longitude" />
         <DataAnnotationsValidator />
 
         <div class="form-group">
             <label for="Name">Name</label>
-            <InputText id="Name" @bind-Value="tour.Name" />
-            <ValidationMessage For="@(() => tour.Name)" />
+            <InputText id="Name" @bind-Value="tourLeg.Name" />
+            <ValidationMessage For="@(() => tourLeg.Name)" />
         </div>
         <div class="form-group">
-            <label for="Description">Description</label>
-            <InputTextArea id="Description" @bind-Value="tour.Description" />
-            <ValidationMessage For="@(() => tour.Description)" />
-        </div>
-        <div class="form-group">
-            <label for="Price">Price</label>
-            <InputNumber id="Price" @bind-Value="tour.Price" />
-            <ValidationMessage For="@(() => tour.Price)" />
+            <label for="Name">Text</label>
+            <InputTextArea id="Name" @bind-Value="tourLeg.Text" />
+            <ValidationMessage For="@(() => tourLeg.Text)" />
         </div>
 
         <button type="submit" class="btn btn-primary">Save</button>
     </EditForm>
-    <a href="/api/audio/tours/@TourId" target="_blank">Listen to Intro Audio</a>
+    <a href="/api/audio/tours/legs/@TourLegId" target="_blank">Listen to Intro Audio</a>
     <div id="myMap" style="width: 100%; height: 400px;"></div>
     <EditForm Model="Request" OnValidSubmit="RequestTTS">
         <DataAnnotationsValidator />
-        <div class="form-group">
-            <label for="Text">Text</label>
-            <InputTextArea id="Text" @bind-Value="Request.Text" />
-            <ValidationMessage For="@(() => Request.Text)" />
-        </div>
         <div class="form-group">
             <label for="Model">Model</label>
              <InputSelect id="Model" @bind-Value="Request.Model">
@@ -58,12 +48,6 @@
                 }
             </InputSelect>
             <ValidationMessage For="@(() => Request.Model)" />
-        </div>
-        <div class="form-group">
-            <label for="Append">Append</label>
-            <InputCheckbox id="Append" @bind-Value="Request.Append"/>
-            <label for="Replace">Replace</label>
-            <InputCheckbox id="Replace" @bind-Value="Request.Replace"/>
         </div>
         <button type="submit" class="btn btn-primary">Request TTS</button>
     </EditForm>
@@ -80,45 +64,7 @@
             </li>
         }
     </ul>
-    <h2>Tour Legs</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Sequence</th>
-                <th>Audio</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var tourLeg in tour.TourLegs.OrderBy(t => t.Sequence))
-            {
-                <tr>
-                    <td><a href="/tours/legs/@tourLeg.TourLegId">@tourLeg.Name</a></td>
-                    <td>@tourLeg.Sequence</td>
-                    <td><a href="/api/audio/tours/legs/@tourLeg.TourLegId" target="_blank">Audio</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <EditForm Model="NewTourLeg" OnValidSubmit="AddTourLeg">
-        <DataAnnotationsValidator />
-        <div class="form-group">
-            <label for="NewTourLegName">Name</label>
-            <InputText id="NewTourLegName" @bind-Value="NewTourLeg.Name" />
-            <ValidationMessage For="@(() => NewTourLeg.Name)" />
-        </div>
-        <div class="form-group">
-            <label for="NewTourLegText">Text</label>
-            <InputTextArea id="NewTourLegText" @bind-Value="NewTourLeg.Text" />
-            <ValidationMessage For="@(() => NewTourLeg.Text)" />
-        </div>
-        <div class="form-group">
-            <label for="NewTourLegSequence">Sequence</label>
-            <InputNumber id="NewTourLegSequence" @bind-Value="NewTourLeg.Sequence" />
-            <ValidationMessage For="@(() => NewTourLeg.Sequence)" />
-        </div>
-        <button type="submit" class="btn btn-primary">Add Tour Leg</button>
-    </EditForm>
+    
 }
 else
 {
@@ -129,28 +75,23 @@ else
     public class TTSRequest
     {
         [Required(AllowEmptyStrings = false)]
-        public string Text { get; set; } = null!;
-        [Required(AllowEmptyStrings = false)]
-        public string Model{ get; set; } = null!;
-        public bool Append { get; set; } = false;
-        public bool Replace { get; set; } = false;
+        public string Model { get; set; } = null!;
     }
-    [Parameter] public string TourId { get; set; } = null!;
-    private TourLeg NewTourLeg = new TourLeg();
+    [Parameter] public string TourLegId { get; set; } = null!;
     private HubConnection? hubConnection;
     private List<InferencePollResponse> Polls = new List<InferencePollResponse>();
     public TTSRequest Request = new TTSRequest();
-    Tour? tour;
+    TourLeg? tourLeg;
     double? Latitude;
     double? Longitude;
     IEnumerable<VoiceActor> VoiceActors = new List<VoiceActor>();
     bool isInited = false;
     protected override async Task OnInitializedAsync()
     {
-        tour = await TourRepository.GetByID(Guid.Parse(TourId), properites: new []{ new EntityProperty("TourLegs", true)});
+        tourLeg = await TourLegRepository.GetByID(Guid.Parse(TourLegId), properites: new []{ new EntityProperty("Tour")});
         VoiceActors = await VoiceActorRepository.Get();
-        Latitude = tour?.StartingPoint?.X;
-        Longitude = tour?.StartingPoint?.Y;
+        Latitude = tourLeg?.Waypoint?.X;
+        Longitude = tourLeg?.Waypoint?.Y;
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavManager.ToAbsoluteUri("/hubs/tts"), options =>
             {
@@ -175,22 +116,16 @@ else
     public async Task RequestTTS()
     {
         if(hubConnection != null)
-            await hubConnection.SendAsync("SubmitTTSForTour", TourId, Request.Text, Request.Model, Request.Append, Request.Replace);
+            await hubConnection.SendAsync("SubmitTTSForTourLeg", TourLegId, Request.Model);
     }
-    public async Task AddTourLeg()
+    private async Task UpdateTourLeg()
     {
-        NewTourLeg.TourId = Guid.Parse(TourId);
-        await TourLegRepository.Add(NewTourLeg);
-        NavManager.NavigateTo($"/tours/legs/{NewTourLeg.TourLegId}");
-    }
-    private async Task UpdateTour()
-    {
-        if(tour != null && Longitude != null && Latitude != null)
-            tour.StartingPoint = new Point(Latitude.Value, Longitude.Value)
+        if(tourLeg != null && Longitude != null && Latitude != null)
+            tourLeg.Waypoint = new Point(Latitude.Value, Longitude.Value)
                 {
                     SRID = 4326
                 };
-        await TourRepository.Update(tour ?? throw new InvalidOperationException());
+        await TourLegRepository.Update(tourLeg ?? throw new InvalidOperationException());
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

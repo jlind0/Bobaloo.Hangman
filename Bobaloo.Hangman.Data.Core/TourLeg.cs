@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Bobaloo.Hangman.Data.Core;
 using NetTopologySuite.Geometries;
 
@@ -11,15 +12,17 @@ public partial class TourLeg : Entity<Guid>
     public Guid TourLegId { get; set; }
 
     public Guid TourId { get; set; }
-
+    [Required]
     public string Name { get; set; } = null!;
-
+    [Required]
     public string Text { get; set; } = null!;
-
-    public byte[]? Audio { get; set; }
-
+    [Required]
     public long Sequence { get; set; }
-    public Point Waypoint { get; set; }
+    public Point? Waypoint { get; set; }
 
     public virtual Tour Tour { get; set; } = null!;
+}
+public class TourLegWithBinaryData : TourLeg
+{
+    public byte[]? Audio { get; set; }
 }

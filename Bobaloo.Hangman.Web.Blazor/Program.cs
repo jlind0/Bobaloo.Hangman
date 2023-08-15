@@ -37,6 +37,7 @@ builder.Services.AddScoped<IRepository<HangmanUnitOfWork, Tour, Guid>, Repositor
 builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid>, Repository<TourWithBinaryData, Guid>>();
 builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourLeg, Guid>, Repository<TourLeg, Guid>>();
 builder.Services.AddScoped<IRepository<HangmanUnitOfWork, VoiceActor, int>, Repository<VoiceActor, int>>();
+builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid>, Repository<TourLegWithBinaryData, Guid>>();
 builder.Services.AddSingleton<ITTSCleint, FakeYouClient>();
 builder.Services.AddSingleton<IGoogleStorageClient, GoogleStorageClient>();
 builder.Services.AddSwaggerGen();

@@ -42,6 +42,16 @@ public partial class HangmantoursContext : DbContext
                 .HasColumnType("geography")
                 .HasConversion(v => v, v => v);
             entity.Ignore(e => e.PrimaryKey);
+            entity.ToTable("TourLegs", "dbo");
+        });
+        modelBuilder.Entity<TourLegWithBinaryData>(entity =>
+        {
+            entity.Property(e => e.Waypoint)
+                .HasColumnType("geography")
+                .HasConversion(v => v, v => v);
+            entity.Ignore(e => e.PrimaryKey);
+
+            entity.ToTable("TourLegs");
         });
         modelBuilder.Entity<VoiceActor>(entity =>
         {
