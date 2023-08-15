@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bobaloo.Hangman.Business.Core\Bobaloo.Hangman.Business.Core.csproj" />
+    <ProjectReference Include="..\Bobaloo.Hangman.Data.Core\Bobaloo.Hangman.Data.Core.csproj" />
+    <ProjectReference Include="..\Bobaloo.Hangman.Data\Bobaloo.Hangman.Data.csproj" />
+    <ProjectReference Include="..\Bobaloo.Hangman.TTS\Bobaloo.Hangman.TTS.csproj" />
+  </ItemGroup>
+
+</Project>

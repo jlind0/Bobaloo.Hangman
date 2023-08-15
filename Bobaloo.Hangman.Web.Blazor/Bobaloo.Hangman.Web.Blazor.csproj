@@ -34,6 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Bobaloo.Hangman.Business.Core\Bobaloo.Hangman.Business.Core.csproj" />
+    <ProjectReference Include="..\Bobaloo.Hangman.Business\Bobaloo.Hangman.Business.csproj" />
     <ProjectReference Include="..\Bobaloo.Hangman.Data.Core\Bobaloo.Hangman.Data.Core.csproj" />
     <ProjectReference Include="..\Bobaloo.Hangman.Data\Bobaloo.Hangman.Data.csproj" />
     <ProjectReference Include="..\Bobaloo.Hangman.TTS\Bobaloo.Hangman.TTS.csproj" />

@@ -6,14 +6,16 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Bobaloo.Hangman.TTS
 @using System.ComponentModel.DataAnnotations;
+@using Bobaloo.Hangman.Business.Core;
+@using Microsoft.CognitiveServices.Speech;
 @inject IRepository<HangmanUnitOfWork, TourLeg, Guid> TourLegRepository
 @inject NavigationManager NavManager
 @inject IJSRuntime JSRun
 @inject IHttpContextAccessor Context
-@inject IRepository<HangmanUnitOfWork, VoiceActor, int> VoiceActorRepository
-@implements IAsyncDisposable
+@inject ITourLegBusiness TourLegBusiness
+@inject IAzureTTS TTS
 <PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
-@if (tourLeg != null)
+@if (tourLeg != null && Voices != null)
 {
     <a href="/tours/@tourLeg.TourLegId">@tourLeg.Tour.Name</a>
     <EditForm Model="tourLeg" OnValidSubmit="UpdateTourLeg">
@@ -28,7 +30,7 @@
         </div>
         <div class="form-group">
             <label for="Name">Text</label>
-            <InputTextArea id="Name" @bind-Value="tourLeg.Text" />
+            <InputTextArea id="Name" @bind-Value="tourLeg.Text" style="width:100%;height:200px;" />
             <ValidationMessage For="@(() => tourLeg.Text)" />
         </div>
 
@@ -40,30 +42,34 @@
         <DataAnnotationsValidator />
         <div class="form-group">
             <label for="Model">Model</label>
-             <InputSelect id="Model" @bind-Value="Request.Model">
-                 <option value="">Select a Model</option>
-                @foreach(var actor in VoiceActors)
+            <InputSelect id="Model" Value="Request.Model"
+                         ValueExpression="@(() => Request.Model)"
+                         ValueChanged="@((string val)=> ModelChanged(val))">
+                <option value="">Select a Model</option>
+                @foreach (var actor in Voices)
                 {
-                    <option value="@actor.FakeYouModelName">@actor.Name</option>
+                    <option value="@actor.ShortName">@actor.LocalName</option>
                 }
             </InputSelect>
             <ValidationMessage For="@(() => Request.Model)" />
+            @if (ModelStyles != null)
+            {
+                <InputSelect id="ModelStyle" @bind-Value="Request.Style">
+                    <option value="">Select a Style</option>
+                    @foreach (var style in ModelStyles)
+                    {
+                        <option value="@style">@style</option>
+                    }
+                </InputSelect>
+            }
         </div>
-        <button type="submit" class="btn btn-primary">Request TTS</button>
-    </EditForm>
-    <ul>
-        @foreach(var poll in Polls)
+
+        <button type="submit" disabled="@isRunningTTS" class="btn btn-primary">Request TTS</button>
+        @if (isRunningTTS)
         {
-            <li>
-                <b>@poll.state.status</b> : @poll.state.title 
-                @if(!string.IsNullOrEmpty(poll.state.maybe_public_bucket_wav_audio_path))
-                {
-                    string url = "https://storage.googleapis.com/vocodes-public" + poll.state.maybe_public_bucket_wav_audio_path;
-                    <a target="_blank" href="@url">Listen</a>
-                }
-            </li>
+            <b>Please wait while your speech is generated.</b>
         }
-    </ul>
+    </EditForm>
     
 }
 else
@@ -76,47 +82,36 @@ else
     {
         [Required(AllowEmptyStrings = false)]
         public string Model { get; set; } = null!;
+        public string? Style{ get; set; }
     }
     [Parameter] public string TourLegId { get; set; } = null!;
-    private HubConnection? hubConnection;
-    private List<InferencePollResponse> Polls = new List<InferencePollResponse>();
     public TTSRequest Request = new TTSRequest();
     TourLeg? tourLeg;
     double? Latitude;
     double? Longitude;
-    IEnumerable<VoiceActor> VoiceActors = new List<VoiceActor>();
+    IEnumerable<VoiceInfo>? Voices;
+    bool isRunningTTS = false;
     bool isInited = false;
     protected override async Task OnInitializedAsync()
     {
         tourLeg = await TourLegRepository.GetByID(Guid.Parse(TourLegId), properites: new []{ new EntityProperty("Tour")});
-        VoiceActors = await VoiceActorRepository.Get();
+        Voices = (await TTS.GetVoices()).OrderBy(t => t.LocalName);
         Latitude = tourLeg?.Waypoint?.X;
         Longitude = tourLeg?.Waypoint?.Y;
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavManager.ToAbsoluteUri("/hubs/tts"), options =>
-            {
-                var container = new System.Net.CookieContainer();
-                foreach (var item in Context.HttpContext?.Request.Cookies ?? throw new InvalidOperationException())
-                {
-                    container.Add(new System.Net.Cookie(item.Key, item.Value) { Domain = Context.HttpContext.Request.Host.Host, HttpOnly = true });
-                }
-                options.Cookies = container;
-            })
-            .Build();
-
-        hubConnection.On<InferencePollResponse>("recievePoll", poll =>
-        {
-            Polls.Add(poll);
-            InvokeAsync(StateHasChanged);
-        });
-
-        await hubConnection.StartAsync();
         isInited = true;
+    }
+    string[]? ModelStyles = null;
+    public async Task ModelChanged(string e)
+    {
+        Request.Model = e;
+        ModelStyles = Voices?.Single(v => v.ShortName == e).StyleList;
+
     }
     public async Task RequestTTS()
     {
-        if(hubConnection != null)
-            await hubConnection.SendAsync("SubmitTTSForTourLeg", TourLegId, Request.Model);
+        isRunningTTS = true;
+        await TourLegBusiness.UpdateTourLegAudio(Guid.Parse(TourLegId), Request.Model, Request.Style);
+        isRunningTTS = false;
     }
     private async Task UpdateTourLeg()
     {
@@ -148,12 +143,5 @@ else
     {
         Latitude = lat;
         Longitude = lon;
-    }
-    public async ValueTask DisposeAsync()
-    {
-        if (hubConnection is not null)
-        {
-            await hubConnection.DisposeAsync();
-        }
     }
 }

@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using Bobaloo.Hangman.Web.Hubs;
+using Bobaloo.Hangman.Business.Core;
+using Bobaloo.Hangman.Business;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,11 +34,14 @@ builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IContextFactory, ContextFactory>();
-builder.Services.AddScoped<IRepository<HangmanUnitOfWork, Tour, Guid>, Repository<Tour, Guid>>();
-builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid>, Repository<TourWithBinaryData, Guid>>();
-builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourLeg, Guid>, Repository<TourLeg, Guid>>();
-builder.Services.AddScoped<IRepository<HangmanUnitOfWork, VoiceActor, int>, Repository<VoiceActor, int>>();
-builder.Services.AddScoped<IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid>, Repository<TourLegWithBinaryData, Guid>>();
+builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, Tour, Guid>, Repository<Tour, Guid>>();
+builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid>, Repository<TourWithBinaryData, Guid>>();
+builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLeg, Guid>, Repository<TourLeg, Guid>>();
+builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, VoiceActor, int>, Repository<VoiceActor, int>>();
+builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid>, Repository<TourLegWithBinaryData, Guid>>();
+builder.Services.AddSingleton<IAzureTTS, AzureTTS>();
+builder.Services.AddSingleton<ITourBusiness, TourBusiness>();
+builder.Services.AddSingleton<ITourLegBusiness, TourLegBusiness>();
 builder.Services.AddSingleton<ITTSCleint, FakeYouClient>();
 builder.Services.AddSingleton<IGoogleStorageClient, GoogleStorageClient>();
 builder.Services.AddSwaggerGen();
@@ -61,7 +65,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapBlazorHub();
-app.MapHub<TTSHub>("/hubs/tts");
 app.MapFallbackToPage("/_Host");
 
 app.Run();

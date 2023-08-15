@@ -6,15 +6,17 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Bobaloo.Hangman.TTS
 @using System.ComponentModel.DataAnnotations;
+@using Microsoft.CognitiveServices.Speech
+@using Bobaloo.Hangman.Business.Core;
+@inject ITourBusiness TourBusiness
 @inject IRepository<HangmanUnitOfWork, Tour, Guid> TourRepository
 @inject IRepository<HangmanUnitOfWork, TourLeg, Guid> TourLegRepository
 @inject NavigationManager NavManager
 @inject IJSRuntime JSRun
 @inject IHttpContextAccessor Context
-@inject IRepository<HangmanUnitOfWork, VoiceActor, int> VoiceActorRepository
-@implements IAsyncDisposable
+@inject IAzureTTS TTS
 <PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
-@if (tour != null)
+@if (tour != null && Voices != null)
 {
     <EditForm Model="tour" OnValidSubmit="UpdateTour">
         <input type="hidden" value="@Latitude" id="Latitude" />
@@ -28,7 +30,7 @@
         </div>
         <div class="form-group">
             <label for="Description">Description</label>
-            <InputTextArea id="Description" @bind-Value="tour.Description" />
+            <InputTextArea id="Description" @bind-Value="tour.Description" style="width:100%;height:200px;" />
             <ValidationMessage For="@(() => tour.Description)" />
         </div>
         <div class="form-group">
@@ -45,41 +47,37 @@
         <DataAnnotationsValidator />
         <div class="form-group">
             <label for="Text">Text</label>
-            <InputTextArea id="Text" @bind-Value="Request.Text" />
+            <InputTextArea id="Text" @bind-Value="Request.Text" style="width:100%;height:200px;" />
             <ValidationMessage For="@(() => Request.Text)" />
         </div>
         <div class="form-group">
             <label for="Model">Model</label>
-             <InputSelect id="Model" @bind-Value="Request.Model">
+             <InputSelect id="Model" Value="Request.Model" 
+             ValueExpression="@(() => Request.Model)" 
+             ValueChanged="@((string val)=> ModelChanged(val))">
                  <option value="">Select a Model</option>
-                @foreach(var actor in VoiceActors)
+                @foreach(var actor in Voices)
                 {
-                    <option value="@actor.FakeYouModelName">@actor.Name</option>
+                    <option value="@actor.ShortName">@actor.LocalName</option>
                 }
             </InputSelect>
-            <ValidationMessage For="@(() => Request.Model)" />
+            @if (ModelStyles != null)
+            {
+                <InputSelect id="ModelStyle" @bind-Value="Request.Style">
+                    <option value="">Select a Style</option>
+                    @foreach(var style in ModelStyles)
+                    {
+                        <option value="@style">@style</option>
+                    }
+                </InputSelect>
+            }
         </div>
-        <div class="form-group">
-            <label for="Append">Append</label>
-            <InputCheckbox id="Append" @bind-Value="Request.Append"/>
-            <label for="Replace">Replace</label>
-            <InputCheckbox id="Replace" @bind-Value="Request.Replace"/>
-        </div>
-        <button type="submit" class="btn btn-primary">Request TTS</button>
-    </EditForm>
-    <ul>
-        @foreach(var poll in Polls)
+        <button type="submit" disabled="@isRunningTTS" class="btn btn-primary">Request TTS</button>
+        @if(isRunningTTS)
         {
-            <li>
-                <b>@poll.state.status</b> : @poll.state.title 
-                @if(!string.IsNullOrEmpty(poll.state.maybe_public_bucket_wav_audio_path))
-                {
-                    string url = "https://storage.googleapis.com/vocodes-public" + poll.state.maybe_public_bucket_wav_audio_path;
-                    <a target="_blank" href="@url">Listen</a>
-                }
-            </li>
+            <b>Please wait while your speech is generated.</b>
         }
-    </ul>
+    </EditForm>
     <h2>Tour Legs</h2>
     <table class="table">
         <thead>
@@ -109,7 +107,7 @@
         </div>
         <div class="form-group">
             <label for="NewTourLegText">Text</label>
-            <InputTextArea id="NewTourLegText" @bind-Value="NewTourLeg.Text" />
+            <InputTextArea id="NewTourLegText" style="width:100%;height:200px;" @bind-Value="NewTourLeg.Text" />
             <ValidationMessage For="@(() => NewTourLeg.Text)" />
         </div>
         <div class="form-group">
@@ -132,50 +130,38 @@ else
         public string Text { get; set; } = null!;
         [Required(AllowEmptyStrings = false)]
         public string Model{ get; set; } = null!;
-        public bool Append { get; set; } = false;
-        public bool Replace { get; set; } = false;
+        public string? Style{ get; set; }
     }
+    bool isRunningTTS = false;
     [Parameter] public string TourId { get; set; } = null!;
     private TourLeg NewTourLeg = new TourLeg();
-    private HubConnection? hubConnection;
-    private List<InferencePollResponse> Polls = new List<InferencePollResponse>();
     public TTSRequest Request = new TTSRequest();
+    IEnumerable<VoiceInfo>? Voices;
     Tour? tour;
     double? Latitude;
     double? Longitude;
-    IEnumerable<VoiceActor> VoiceActors = new List<VoiceActor>();
     bool isInited = false;
     protected override async Task OnInitializedAsync()
     {
+        Voices = (await TTS.GetVoices()).OrderBy(v => v.LocalName);
         tour = await TourRepository.GetByID(Guid.Parse(TourId), properites: new []{ new EntityProperty("TourLegs", true)});
-        VoiceActors = await VoiceActorRepository.Get();
         Latitude = tour?.StartingPoint?.X;
         Longitude = tour?.StartingPoint?.Y;
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavManager.ToAbsoluteUri("/hubs/tts"), options =>
-            {
-                var container = new System.Net.CookieContainer();
-                foreach (var item in Context.HttpContext?.Request.Cookies ?? throw new InvalidOperationException())
-                {
-                    container.Add(new System.Net.Cookie(item.Key, item.Value) { Domain = Context.HttpContext.Request.Host.Host, HttpOnly = true });
-                }
-                options.Cookies = container;
-            })
-            .Build();
 
-        hubConnection.On<InferencePollResponse>("recievePoll", poll =>
-        {
-            Polls.Add(poll);
-            InvokeAsync(StateHasChanged);
-        });
-
-        await hubConnection.StartAsync();
         isInited = true;
+    }
+    string[]? ModelStyles = null;
+    public async Task ModelChanged(string e)
+    {
+        Request.Model = e;
+        ModelStyles = Voices?.Single(v => v.ShortName == e).StyleList;
+
     }
     public async Task RequestTTS()
     {
-        if(hubConnection != null)
-            await hubConnection.SendAsync("SubmitTTSForTour", TourId, Request.Text, Request.Model, Request.Append, Request.Replace);
+        isRunningTTS = true;
+        await TourBusiness.UpdateIntroAudio(Guid.Parse(TourId), Request.Text, Request.Model, Request.Style);
+        isRunningTTS = false;
     }
     public async Task AddTourLeg()
     {
@@ -213,12 +199,5 @@ else
     {
         Latitude = lat;
         Longitude = lon;
-    }
-    public async ValueTask DisposeAsync()
-    {
-        if (hubConnection is not null)
-        {
-            await hubConnection.DisposeAsync();
-        }
     }
 }
