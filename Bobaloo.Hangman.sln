@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Data", "Bob
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Web.Blazor", "Bobaloo.Hangman.Web.Blazor\Bobaloo.Hangman.Web.Blazor.csproj", "{9C5A5A8D-707F-46BF-B8FC-7D140A9B237E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bobaloo.Hangman.Business", "Bobaloo.Hangman.Business\Bobaloo.Hangman.Business.csproj", "{093279CE-25F3-4120-AF50-EA682521A108}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Business", "Bobaloo.Hangman.Business\Bobaloo.Hangman.Business.csproj", "{093279CE-25F3-4120-AF50-EA682521A108}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bobaloo.Hangman.Business.Core", "Bobaloo.Hangman.Business.Core\Bobaloo.Hangman.Business.Core.csproj", "{DF70AFE6-BF17-482F-A684-B063DB0C6DF4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Business.Core", "Bobaloo.Hangman.Business.Core\Bobaloo.Hangman.Business.Core.csproj", "{DF70AFE6-BF17-482F-A684-B063DB0C6DF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

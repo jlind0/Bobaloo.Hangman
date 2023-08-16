@@ -1,0 +1,54 @@
+﻿@page "/users"
+@attribute [Authorize(Policy = "IsAdmin")]
+@using Bobaloo.Hangman.Data.Core
+@using Bobaloo.Hangman.Data
+@inject IRepository<HangmanUnitOfWork, User, string> UsersRepository
+<h3>Users</h3>
+@if (Users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Given Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>Is Admin</th>
+                <th>Toggle Admin</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Users)
+            {
+                <tr>
+                    <td>@user.GivenName</td>
+                    <td>@user.Surname</td>
+                    <td>@user.Email</td>
+                    <td><input type="checkbox" checked="@user.IsAdmin" disabled="disabled"/></td>
+                    <td><button @onclick="() => ToggleAdmin(user.UserId)">Toggle Admin</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+@code {
+    IEnumerable<User>? Users;
+    protected async override Task OnInitializedAsync()
+    {
+        Users = await UsersRepository.Get();
+    }
+    private async Task ToggleAdmin(string userId)
+    {
+        var user = await UsersRepository.GetByID(userId);
+        if (user != null)
+        {
+            user.IsAdmin = !user.IsAdmin;
+            await UsersRepository.Update(user);
+            Users = await UsersRepository.Get();
+        }
+    }
+}

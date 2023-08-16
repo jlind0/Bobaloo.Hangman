@@ -1,4 +1,5 @@
 ﻿@page "/"
+@attribute [Authorize(Policy = "IsAdmin")]
 @using Bobaloo.Hangman.Data.Core
 @using Bobaloo.Hangman.Data
 @using System.Security.Claims;
