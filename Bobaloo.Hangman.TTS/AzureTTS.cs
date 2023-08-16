@@ -34,8 +34,12 @@ namespace Bobaloo.Hangman.TTS
             var config = GetConfig();
             using(var speech = new SpeechSynthesizer(config))
             {
+                List<VoiceInfo> voices = new List<VoiceInfo>();
                 var result = await speech.GetVoicesAsync("en-US");
-                return result.Voices.ToArray();
+                voices.AddRange(result.Voices.ToArray());
+                var gbResult = await speech.GetVoicesAsync("en-GB");
+                voices.AddRange(gbResult.Voices.ToArray());
+                return voices.ToArray();
             }
         }
         public async Task<byte[]> GenerateSpeech(string text, string voiceName, string? style = null, CancellationToken token = default)
@@ -44,7 +48,7 @@ namespace Bobaloo.Hangman.TTS
             config.SpeechSynthesisVoiceName = voiceName;
             using (var speech = new SpeechSynthesizer(config))
             {
-                string saml = null; 
+                string? saml = null; 
                 if(!string.IsNullOrWhiteSpace(style))
                     saml = $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xmlns:mstts=\"https://www.w3.org/2001/mstts\" xml:lang=\"zh-CN\"><voice name=\"{voiceName}\"><mstts:express-as style=\"{style}\" styledegree=\"1\">{text}</mstts:express-as></voice></speak>";
                 SpeechSynthesisResult result;

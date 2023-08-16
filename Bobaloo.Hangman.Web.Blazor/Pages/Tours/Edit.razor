@@ -62,7 +62,7 @@
                  <option value="">Select a Model</option>
                 @foreach(var actor in Voices)
                 {
-                    <option value="@actor.ShortName">@actor.LocalName</option>
+                    <option value="@actor.ShortName">@actor.LocalName (@actor.Locale)</option>
                 }
             </InputSelect>
             @if (ModelStyles != null)

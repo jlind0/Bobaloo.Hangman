@@ -17,7 +17,7 @@
 <PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
 @if (tourLeg != null && Voices != null)
 {
-    <a href="/tours/@tourLeg.TourLegId">@tourLeg.Tour.Name</a>
+    <a href="/tours/@tourLeg.TourId">@tourLeg.Tour.Name</a>
     <EditForm Model="tourLeg" OnValidSubmit="UpdateTourLeg">
         <input type="hidden" value="@Latitude" id="Latitude" />
         <input type="hidden" value="@Longitude" id="Longitude" />
@@ -52,7 +52,7 @@
                 <option value="">Select a Model</option>
                 @foreach (var actor in Voices)
                 {
-                    <option value="@actor.ShortName">@actor.LocalName</option>
+                    <option value="@actor.ShortName">@actor.LocalName (@actor.Locale)</option>
                 }
             </InputSelect>
             <ValidationMessage For="@(() => Request.Model)" />
