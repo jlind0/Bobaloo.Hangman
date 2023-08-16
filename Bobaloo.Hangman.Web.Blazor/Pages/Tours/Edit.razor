@@ -1,5 +1,5 @@
 ﻿@page "/tours/{tourId}"
-@attribute [Authorize]
+@attribute [Authorize(Policy = "IsAdmin")]
 @using Bobaloo.Hangman.Data.Core
 @using Bobaloo.Hangman.Data
 @using NetTopologySuite.Geometries;
@@ -42,6 +42,10 @@
         <button type="submit" class="btn btn-primary">Save</button>
     </EditForm>
     <a href="/api/audio/tours/@TourId" target="_blank">Listen to Intro Audio</a>
+    <div id='searchBoxContainer'>
+        <input type='text' id='searchBox' />
+        <input type='button' value='Search' onclick='geocode()' />
+    </div>
     <div id="myMap" style="width: 100%; height: 400px;"></div>
     <EditForm Model="Request" OnValidSubmit="RequestTTS">
         <DataAnnotationsValidator />

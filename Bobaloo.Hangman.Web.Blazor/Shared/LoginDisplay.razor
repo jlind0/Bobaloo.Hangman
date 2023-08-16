@@ -1,6 +1,7 @@
 ﻿<AuthorizeView>
     <Authorized>
-        Hello, @context.User.Identity?.Name!
+        Hello,  @context.User.Claims.Single(c => c.Type.ToLower().Contains("givenname")).Value @context.User.Claims.Single(c => c.Type.ToLower().Contains("surname")).Value
+        
         <a href="MicrosoftIdentity/Account/SignOut">Log out</a>
     </Authorized>
     <NotAuthorized>

@@ -1,8 +1,9 @@
 ﻿@page "/"
 @using Bobaloo.Hangman.Data.Core
 @using Bobaloo.Hangman.Data
+@using System.Security.Claims;
 @inject IRepository<HangmanUnitOfWork, Tour, Guid> TourRepository
-@attribute [Authorize]
+@inject IHttpContextAccessor Context
 <PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
 
 <h1>Tours</h1>
@@ -34,8 +35,10 @@ else
 }
 @code{
     IEnumerable<Tour>? Tours;
+    Claim[]? Claims;
     protected override async Task OnInitializedAsync()
     {
         Tours = await TourRepository.Get();
+        
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bobaloo.Hangman.Data.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using NetTopologySuite.Geometries;
@@ -9,6 +10,7 @@ namespace Bobaloo.Hangman.Data;
 public partial class HangmantoursContext : DbContext
 {
     protected IConfiguration Configuration;
+    public virtual DbSet<User> Users { get; set; }
     public HangmantoursContext(IConfiguration config)
     {
         Configuration = config;
@@ -54,6 +56,10 @@ public partial class HangmantoursContext : DbContext
             entity.ToTable("TourLegs");
         });
         modelBuilder.Entity<VoiceActor>(entity =>
+        {
+            entity.Ignore(e => e.PrimaryKey);
+        });
+        modelBuilder.Entity<User>(entity =>
         {
             entity.Ignore(e => e.PrimaryKey);
         });

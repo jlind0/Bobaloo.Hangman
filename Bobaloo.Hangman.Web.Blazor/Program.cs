@@ -12,38 +12,48 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Bobaloo.Hangman.Business.Core;
 using Bobaloo.Hangman.Business;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApi(builder.Configuration)
-                    .EnableTokenAcquisitionToCallDownstreamApi().AddInMemoryTokenCaches();
+                    .EnableTokenAcquisitionToCallDownstreamApi()
+                        .AddInMemoryTokenCaches();
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApp(builder.Configuration).EnableTokenAcquisitionToCallDownstreamApi();
 builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder(
         JwtBearerDefaults.AuthenticationScheme,
         OpenIdConnectDefaults.AuthenticationScheme).RequireAuthenticatedUser().Build();
+    options.AddPolicy("IsAdmin", policy => { 
+        policy.Requirements.Add(new CommaSeparatedRolesRequirement
+        {
+            Roles = new[] { "Tour.Admin" }
+        });
+    });
+
 });
-builder.Services.AddControllersWithViews()
-    .AddMicrosoftIdentityUI();
+
+builder.Services.AddTokenAcquisition();
+builder.Services.AddControllersWithViews();
 
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
 builder.Services.AddSignalR();
+builder.Services.AddLogging();
 builder.Services.AddSingleton<IContextFactory, ContextFactory>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, Tour, Guid>, Repository<Tour, Guid>>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid>, Repository<TourWithBinaryData, Guid>>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLeg, Guid>, Repository<TourLeg, Guid>>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, VoiceActor, int>, Repository<VoiceActor, int>>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid>, Repository<TourLegWithBinaryData, Guid>>();
+builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, User, string>, Repository<User, string>>(); 
 builder.Services.AddSingleton<IAzureTTS, AzureTTS>();
 builder.Services.AddSingleton<ITourBusiness, TourBusiness>();
 builder.Services.AddSingleton<ITourLegBusiness, TourLegBusiness>();
-builder.Services.AddSingleton<ITTSCleint, FakeYouClient>();
-builder.Services.AddSingleton<IGoogleStorageClient, GoogleStorageClient>();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
