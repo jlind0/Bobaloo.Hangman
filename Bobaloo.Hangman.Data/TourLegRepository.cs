@@ -24,14 +24,7 @@ namespace Bobaloo.Hangman.Data
             {
                 await Use(async (w, t) =>
                 {
-                    IQueryable<TourLeg> query = w.Context.TourLegs.Where(c => c.TourId == tourId).Select(p => new TourLeg() {
-                        TourId = p.TourId,
-                        Text = p.Text,
-                        Name = p.Name,
-                        Sequence = p.Sequence,
-                        TourLegId = p.TourLegId,
-                        Waypoint = p.Waypoint
-                    });
+                    IQueryable<TourLeg> query = w.Context.TourLegs.Where(c => c.TourId == tourId);
                     await HydrateResultsSet(results, query, w, t, page, filter, orderBy, properites);
                 }, work, token);
             }

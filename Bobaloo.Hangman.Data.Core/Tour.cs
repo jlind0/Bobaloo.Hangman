@@ -25,8 +25,3 @@ public partial class Tour : Entity<Guid>
     public virtual ICollection<TourLeg>? TourLegs { get; set; }
     public virtual ICollection<Subscription>? Subscriptions { get; set; }
 }
-
-public class TourWithBinaryData : Tour
-{
-    public byte[]? IntroductionAudio { get; set; }
-}

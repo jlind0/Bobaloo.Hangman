@@ -15,7 +15,7 @@ namespace Bobaloo.Hangman.Data.Core
         public User? User { get; set; }
         public decimal PurchasePrice { get; set; }
         public DateTime ValidFrom { get; set; } = DateTime.UtcNow;
-        public DateTime ValidToP { get; set; } = DateTime.UtcNow.AddMonths(1);
+        public DateTime ValidTo { get; set; } = DateTime.UtcNow.AddMonths(1);
         public override Guid PrimaryKey { get => SubscriptionId; set => SubscriptionId = value; }
     }
 }

@@ -22,7 +22,3 @@ public partial class TourLeg : Entity<Guid>
 
     public virtual Tour? Tour { get; set; }
 }
-public class TourLegWithBinaryData : TourLeg
-{
-    public byte[]? Audio { get; set; }
-}

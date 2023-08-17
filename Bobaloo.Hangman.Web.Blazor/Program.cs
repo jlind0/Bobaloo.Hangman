@@ -46,10 +46,9 @@ builder.Services.AddServerSideBlazor()
 builder.Services.AddSignalR();
 builder.Services.AddLogging();
 builder.Services.AddSingleton<IContextFactory, ContextFactory>();
+builder.Services.AddSingleton<IAzureStorageBlob, AzureStorageBlob>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, Tour, Guid>, Repository<Tour, Guid>>();
-builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid>, Repository<TourWithBinaryData, Guid>>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLeg, Guid>, TourLegRepository>();
-builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid>, Repository<TourLegWithBinaryData, Guid>>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, User, string>, Repository<User, string>>();
 builder.Services.AddSingleton<ITourLegRepository<HangmanUnitOfWork>, TourLegRepository>();
 builder.Services.AddSingleton<IAzureTTS, AzureTTS>();

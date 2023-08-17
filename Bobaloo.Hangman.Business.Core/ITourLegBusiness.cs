@@ -8,6 +8,7 @@ namespace Bobaloo.Hangman.Business.Core
 {
     public interface ITourLegBusiness
     {
-        public Task UpdateTourLegAudio(Guid tourLegId, string modelName, string? style = null, CancellationToken token = default);
+        Task<byte[]?> GetAudio(Guid tourLegId, CancellationToken token = default);
+        Task UpdateTourLegAudio(Guid tourLegId, string modelName, string? style = null, CancellationToken token = default);
     }
 }

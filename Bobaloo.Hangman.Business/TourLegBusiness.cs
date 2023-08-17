@@ -12,22 +12,29 @@ namespace Bobaloo.Hangman.Business
 {
     public class TourLegBusiness : ITourLegBusiness
     {
-        protected IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid> TourLegsRepository { get; }
+        protected IRepository<HangmanUnitOfWork, TourLeg, Guid> TourLegRepository { get; }
+        protected IAzureStorageBlob StorageBlob { get; }
         protected IAzureTTS TTS { get; }
-        public TourLegBusiness(IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid> tourLegsRepository, IAzureTTS tts)
+        public TourLegBusiness(IRepository<HangmanUnitOfWork, TourLeg, Guid> tourLegRepository,
+            IAzureTTS tts, IAzureStorageBlob storageBlob)
         {
-            TourLegsRepository = tourLegsRepository;
+            TourLegRepository = tourLegRepository;
             TTS = tts;
+            StorageBlob = storageBlob;
         }
 
         public async Task UpdateTourLegAudio(Guid tourLegId, string modelName, string? style = null, CancellationToken token = default)
         {
-            var tourLeg = await TourLegsRepository.GetByID(tourLegId, token: token);
+            var tourLeg = await TourLegRepository.GetByID(tourLegId, token: token);
             if(tourLeg != null) 
             {
-                tourLeg.Audio = await TTS.GenerateSpeech(tourLeg.Text, modelName, style, token);
-                await TourLegsRepository.Update(tourLeg, token: token);
+               await StorageBlob.UploadBlob(tourLegId, await TTS.GenerateSpeech(tourLeg.Text, modelName, style, token), token);
             }
+        }
+
+        public Task<byte[]?> GetAudio(Guid tourLegId, CancellationToken token = default)
+        {
+            return StorageBlob.GetBlob(tourLegId, token: token);
         }
     }
 }

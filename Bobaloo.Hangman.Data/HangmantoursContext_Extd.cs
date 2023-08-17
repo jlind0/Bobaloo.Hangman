@@ -29,14 +29,6 @@ public partial class HangmantoursContext : DbContext
                 .HasColumnType("geography")
                 .HasConversion(v => v, v => v);
             entity.Ignore(e => e.PrimaryKey);
-            entity.ToTable("Tours", "dbo");
-        });
-        modelBuilder.Entity<TourWithBinaryData>(entity =>
-        {
-            entity.Property(e => e.StartingPoint)
-                .HasColumnType("geography")
-                .HasConversion(v => v, v => v);
-            entity.Ignore(e => e.PrimaryKey);
             entity.ToTable("Tours");
         });
         modelBuilder.Entity<TourLeg>(entity =>
@@ -45,16 +37,6 @@ public partial class HangmantoursContext : DbContext
                 .HasColumnType("geography")
                 .HasConversion(v => v, v => v);
             entity.Ignore(e => e.PrimaryKey);
-            entity.ToTable("TourLegs", "dbo");
-        });
-        modelBuilder.Entity<TourLegWithBinaryData>(entity =>
-        {
-            entity.Property(e => e.Waypoint)
-                .HasColumnType("geography")
-                .HasConversion(v => v, v => v);
-            entity.Ignore(e => e.PrimaryKey);
-
-            entity.ToTable("TourLegs");
         });
         modelBuilder.Entity<User>(entity =>
         {

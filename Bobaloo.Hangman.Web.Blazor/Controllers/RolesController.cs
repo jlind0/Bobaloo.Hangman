@@ -49,7 +49,7 @@ namespace Bobaloo.Hangman.Web.Blazor.Controllers
                 await UsersRepository.Add(user, token: token);
             }
             else
-                subscriptions = user.Subscriptions?.Where(c => c.ValidFrom > DateTime.UtcNow).Select(c => c.TourId.ToString()).ToList();
+                subscriptions = user.Subscriptions?.Where(c => c.ValidTo < DateTime.UtcNow).Select(c => c.TourId.ToString()).ToList();
 
             return new RoleBody()
             {

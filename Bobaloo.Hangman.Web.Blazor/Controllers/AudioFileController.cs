@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Bobaloo.Hangman.Web.Authorization;
+using Bobaloo.Hangman.Business.Core;
 
 namespace Bobaloo.Hangman.Web.Controllers
 {
@@ -13,15 +14,17 @@ namespace Bobaloo.Hangman.Web.Controllers
     [ApiController]
     public class AudioController : ControllerBase
     {
-        protected IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid> TourRepository { get; }
-        protected IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid> TourLegRepository { get; }
+        protected ITourBusiness TourBusiness { get; }
+        protected ITourLegBusiness TourLegBusiness { get; }
+        
+        protected ITourLegRepository<HangmanUnitOfWork> TourLegRepository { get; }
         protected IHttpContextAccessor ContextAccessor { get; }
-        public AudioController(IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid> tourRepository, 
-            IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid> tourLegRepostory, IHttpContextAccessor contextAccessor)
+        public AudioController(ITourBusiness tourBusiness, ITourLegBusiness tourLegBusiness, ITourLegRepository<HangmanUnitOfWork> tourLegRepository, IHttpContextAccessor contextAccessor)
         {
-            TourRepository = tourRepository;
-            TourLegRepository = tourLegRepostory;
+            TourBusiness = tourBusiness;
+            TourLegBusiness = tourLegBusiness;
             ContextAccessor = contextAccessor;
+            TourLegRepository = tourLegRepository;
         }
 
         [HttpGet("tours/{tourId}")]
@@ -29,20 +32,22 @@ namespace Bobaloo.Hangman.Web.Controllers
         {
             if (ContextAccessor.HttpContext?.User.HasSubscription(tourId) != true)
                 return Unauthorized();
-            var tour = await TourRepository.GetByID(tourId, token: token);
-            if(tour != null && tour.IntroductionAudio != null)
-                return File(tour.IntroductionAudio, "audio/mpeg");
+            var tourData = await TourBusiness.GetIntroAudio(tourId, token);
+            if(tourData != null)
+                return File(tourData, "audio/mpeg");
             return NotFound();
         }
         [HttpGet("tours/legs/{tourLegId}")]
         public async Task<IActionResult> GetTourLegAudio(Guid tourLegId, CancellationToken token = default)
         {
             var tourLeg = await TourLegRepository.GetByID(tourLegId, token: token);
-            if (tourLeg != null && tourLeg.Audio != null)
+            if (tourLeg != null)
             {
                 if (ContextAccessor.HttpContext?.User.HasSubscription(tourLeg.TourId) != true)
                     return Unauthorized();
-                return File(tourLeg.Audio, "audio/mpeg");
+                var legData = await TourLegBusiness.GetAudio(tourLeg.TourLegId, token);
+                if(legData != null)
+                    return File(legData, "audio/mpeg");
             }
             return NotFound();
         }

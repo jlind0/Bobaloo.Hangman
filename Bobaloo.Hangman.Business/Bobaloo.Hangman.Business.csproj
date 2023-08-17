@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.17.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Bobaloo.Hangman.Business.Core\Bobaloo.Hangman.Business.Core.csproj" />
     <ProjectReference Include="..\Bobaloo.Hangman.Data.Core\Bobaloo.Hangman.Data.Core.csproj" />
     <ProjectReference Include="..\Bobaloo.Hangman.Data\Bobaloo.Hangman.Data.csproj" />
