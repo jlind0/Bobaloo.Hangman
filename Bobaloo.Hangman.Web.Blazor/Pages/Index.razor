@@ -39,7 +39,7 @@ else
     Claim[]? Claims;
     protected override async Task OnInitializedAsync()
     {
-        Tours = await TourRepository.Get();
+        Tours = (await TourRepository.Get()).Entities;
         
     }
 }

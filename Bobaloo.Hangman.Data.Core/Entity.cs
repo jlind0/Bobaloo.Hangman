@@ -15,9 +15,9 @@ namespace Bobaloo.Hangman.Data.Core
         where TEntity : Entity<TKey>, new()
     {
         public IEnumerable<TEntity> Entities { get; set; } = null!;
-        public int Count { get; set; }
-        public int PageSize { get; set; }
-        public int Page { get; set; }
+        public int? Count { get; set; }
+        public int? PageSize { get; set; }
+        public int? Page { get; set; }
 
 
     }

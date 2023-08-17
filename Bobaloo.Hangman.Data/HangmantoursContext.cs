@@ -10,7 +10,6 @@ public partial class HangmantoursContext : DbContext
 
     public virtual DbSet<TourLeg> TourLegs { get; set; }
 
-    public virtual DbSet<VoiceActor> VoiceActors { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,11 +33,6 @@ public partial class HangmantoursContext : DbContext
                 .HasConstraintName("FK_TourLegs_Tours");
         });
 
-        modelBuilder.Entity<VoiceActor>(entity =>
-        {
-            entity.Property(e => e.FakeYouModelName).HasMaxLength(500);
-            entity.Property(e => e.Name).HasMaxLength(1000);
-        });
 
         OnModelCreatingPartial(modelBuilder);
     }

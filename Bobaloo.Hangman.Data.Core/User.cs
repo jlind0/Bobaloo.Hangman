@@ -11,9 +11,9 @@ namespace Bobaloo.Hangman.Data.Core
         public string UserId { get; set; } = null!;
         public string GivenName { get; set; } = null!;
         public string Surname { get; set; } = null!;
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
         public bool IsAdmin { get; set; }
-
+        public ICollection<Subscription>? Subscriptions { get; set; }
         public override string PrimaryKey { get => UserId; set => UserId = value; }
     }
 }

@@ -4,7 +4,7 @@ var dotNetObject;
 var searchManager;
 function mapIsReady() {
     if (dotNetObject === undefined)
-        setTimeout(mapIsReady, 500);
+        setTimeout(mapIsReady, 100);
     else
         dotNetObject.invokeMethodAsync("ConfigureMap");
 }

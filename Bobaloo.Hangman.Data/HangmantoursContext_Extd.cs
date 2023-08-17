@@ -11,6 +11,7 @@ public partial class HangmantoursContext : DbContext
 {
     protected IConfiguration Configuration;
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Subscription> Subscriptions { get; set; }
     public HangmantoursContext(IConfiguration config)
     {
         Configuration = config;
@@ -55,12 +56,21 @@ public partial class HangmantoursContext : DbContext
 
             entity.ToTable("TourLegs");
         });
-        modelBuilder.Entity<VoiceActor>(entity =>
+        modelBuilder.Entity<User>(entity =>
         {
             entity.Ignore(e => e.PrimaryKey);
         });
-        modelBuilder.Entity<User>(entity =>
+        modelBuilder.Entity<Subscription>(entity =>
         {
+            entity.Property(e => e.SubscriptionId).HasDefaultValueSql("(newid())");
+            entity.HasOne(d => d.User).WithMany(p => p.Subscriptions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Subscriptions_Users");
+            entity.HasOne(d => d.Tour).WithMany(p => p.Subscriptions)
+                .HasForeignKey(d => d.TourId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Subscriptions_Tours");
             entity.Ignore(e => e.PrimaryKey);
         });
     }

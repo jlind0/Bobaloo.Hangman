@@ -1,4 +1,5 @@
-﻿using Bobaloo.Hangman.Data.Core;
+﻿using Azure;
+using Bobaloo.Hangman.Data.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -96,14 +97,48 @@ namespace Bobaloo.Hangman.Data
                 return Task.CompletedTask;
             }, work, token, true);
         }
-
-        public virtual async Task<IEnumerable<TEntity>> Get(HangmanUnitOfWork? work = null,
+        protected virtual async Task HydrateResultsSet(RepositoryResultSet<TEntity, TKey> results, 
+            IQueryable<TEntity> query, 
+            HangmanUnitOfWork w,
+            CancellationToken t,
+            Pager? page = null,
+            Expression<Func<TEntity, bool>>? filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+            IEnumerable<EntityProperty>? properites = null)
+        {
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            if (properites != null)
+            {
+                foreach (var propExp in properites.Select(e => e.Name))
+                    query = query.Include(propExp);
+            }
+            if (page != null)
+            {
+                int skip = page.Value.Size * (page.Value.Page - 1);
+                int take = page.Value.Size;
+                results.PageSize = page.Value.Size;
+                results.Page = page.Value.Page;
+                results.Count = await query.CountAsync(t);
+                if (orderBy != null)
+                    results.Entities = await orderBy(query).Skip(skip).Take(take).ToArrayAsync(t);
+                else
+                    results.Entities = await query.Skip(skip).Take(take).ToArrayAsync(t);
+            }
+            else if (orderBy != null)
+                results.Entities = await orderBy(query).ToArrayAsync(t);
+            else
+                results.Entities = await query.ToArrayAsync(t);
+        }
+        public virtual async Task<RepositoryResultSet<TEntity, TKey>> Get(HangmanUnitOfWork? work = null,
             Pager? page = null,
             Expression<Func<TEntity, bool>>? filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
             IEnumerable<EntityProperty>? properites = null, CancellationToken token = default)
         {
-            IEnumerable<TEntity> data = Array.Empty<TEntity>();
+            RepositoryResultSet<TEntity, TKey> results = new RepositoryResultSet<TEntity, TKey>();
             bool hasWork = work != null;
             work ??= new HangmanUnitOfWork(ContextFactory);
             try
@@ -111,29 +146,7 @@ namespace Bobaloo.Hangman.Data
                 await Use(async (w, t) =>
                 {
                     IQueryable<TEntity> query = w.Context.Set<TEntity>();
-
-                    if (filter != null)
-                    {
-                        query = query.Where(filter);
-                    }
-                    if (properites != null)
-                    {
-                        foreach (var propExp in properites.Select(e => e.Name))
-                            query = query.Include(propExp);
-                    }
-                    if (page != null)
-                    {
-                        int skip = page.Value.Size * (page.Value.Page - 1);
-                        int take = page.Value.Size;
-                        if (orderBy != null)
-                            data = await orderBy(query).Skip(skip).Take(take).ToArrayAsync(t);
-                        else
-                            data = await query.Skip(skip).Take(take).ToArrayAsync(t);
-                    }
-                    else if (orderBy != null)
-                        data = await orderBy(query).ToArrayAsync(t);
-                    else
-                        data = await query.ToArrayAsync(t);
+                    await HydrateResultsSet(results,query, w, t, page, filter, orderBy, properites);
                 }, work, token);
             }
             finally
@@ -141,7 +154,7 @@ namespace Bobaloo.Hangman.Data
                 if (!hasWork)
                     work.Dispose();
             }
-            return data;
+            return results;
         }
 
         public virtual async Task<TEntity?> GetByID(TKey key, HangmanUnitOfWork? work = null, IEnumerable<EntityProperty>? properites = null, CancellationToken token = default)

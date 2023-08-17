@@ -20,7 +20,7 @@ public partial class TourLeg : Entity<Guid>
     public long Sequence { get; set; }
     public Point? Waypoint { get; set; }
 
-    public virtual Tour Tour { get; set; } = null!;
+    public virtual Tour? Tour { get; set; }
 }
 public class TourLegWithBinaryData : TourLeg
 {

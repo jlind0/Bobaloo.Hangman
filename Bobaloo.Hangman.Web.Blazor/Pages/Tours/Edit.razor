@@ -10,7 +10,7 @@
 @using Bobaloo.Hangman.Business.Core;
 @inject ITourBusiness TourBusiness
 @inject IRepository<HangmanUnitOfWork, Tour, Guid> TourRepository
-@inject IRepository<HangmanUnitOfWork, TourLeg, Guid> TourLegRepository
+@inject ITourLegRepository<HangmanUnitOfWork> TourLegRepository
 @inject NavigationManager NavManager
 @inject IJSRuntime JSRun
 @inject IHttpContextAccessor Context
@@ -56,11 +56,11 @@
         </div>
         <div class="form-group">
             <label for="Model">Model</label>
-             <InputSelect id="Model" Value="Request.Model" 
-             ValueExpression="@(() => Request.Model)" 
-             ValueChanged="@((string val)=> ModelChanged(val))">
-                 <option value="">Select a Model</option>
-                @foreach(var actor in Voices)
+            <InputSelect id="Model" Value="Request.Model" 
+            ValueExpression="@(() => Request.Model)" 
+            ValueChanged="@((string val)=> ModelChanged(val))">
+                <option value="">Select a Model</option>
+                @foreach (var actor in Voices)
                 {
                     <option value="@actor.ShortName">@actor.LocalName (@actor.Locale)</option>
                 }
@@ -69,7 +69,7 @@
             {
                 <InputSelect id="ModelStyle" @bind-Value="Request.Style">
                     <option value="">Select a Style</option>
-                    @foreach(var style in ModelStyles)
+                    @foreach (var style in ModelStyles)
                     {
                         <option value="@style">@style</option>
                     }
@@ -77,31 +77,53 @@
             }
         </div>
         <button type="submit" disabled="@isRunningTTS" class="btn btn-primary">Request TTS</button>
-        @if(isRunningTTS)
+        @if (isRunningTTS)
         {
             <b>Please wait while your speech is generated.</b>
         }
     </EditForm>
-    <h2>Tour Legs</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Sequence</th>
-                <th>Audio</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var tourLeg in tour.TourLegs.OrderBy(t => t.Sequence))
-            {
+    @if (TourLegs != null)
+    {
+        <h2>Tour Legs</h2>
+        <table class="table">
+            <thead>
                 <tr>
-                    <td><a href="/tours/legs/@tourLeg.TourLegId">@tourLeg.Name</a></td>
-                    <td>@tourLeg.Sequence</td>
-                    <td><a href="/api/audio/tours/legs/@tourLeg.TourLegId" target="_blank">Audio</a></td>
+                    <th>Name</th>
+                    <th>Sequence</th>
+                    <th>Audio</th>
                 </tr>
-            }
+            </thead>
+            <tbody>
+
+                @foreach (var tourLeg in TourLegs.Entities)
+                {
+                    <tr>
+                        <td><a href="/tours/legs/@tourLeg.TourLegId">@tourLeg.Name</a></td>
+                        <td>@tourLeg.Sequence</td>
+                        <td><a href="/api/audio/tours/legs/@tourLeg.TourLegId" target="_blank">Audio</a></td>
+                    </tr>
+                }
         </tbody>
+        
+            
     </table>
+    @if (TourLegs.Page != null)
+    {
+         <span>
+        @if (TourLegs.Page > 1)
+        {
+            
+                <button @onclick="TourLegsPageBack">&lt;</button>
+                
+            
+        }
+        @if (tourLegPage < (TourLegs.Count / TourLegs.PageSize + 1))
+        {
+            <button @onclick="TourLegsPageForward">&gt;</button>
+        }
+        </span>
+    }
+    }
     <EditForm Model="NewTourLeg" OnValidSubmit="AddTourLeg">
         <DataAnnotationsValidator />
         <div class="form-group">
@@ -145,14 +167,33 @@ else
     double? Latitude;
     double? Longitude;
     bool isInited = false;
+    RepositoryResultSet<TourLeg, Guid>? TourLegs;
+    int tourLegPage = 1;
+    int? tourLegCount;
+
     protected override async Task OnInitializedAsync()
     {
-        Voices = (await TTS.GetVoices()).OrderBy(v => v.LocalName);
-        tour = await TourRepository.GetByID(Guid.Parse(TourId), properites: new []{ new EntityProperty("TourLegs", true)});
-        Latitude = tour?.StartingPoint?.X;
-        Longitude = tour?.StartingPoint?.Y;
-
-        isInited = true;
+        try
+        {
+            Voices = (await TTS.GetVoices()).OrderBy(v => v.LocalName);
+            tour = await TourRepository.GetByID(Guid.Parse(TourId));
+            Latitude = tour?.StartingPoint?.X;
+            Longitude = tour?.StartingPoint?.Y;
+            await LoadTourLegs();
+            isInited = true;
+        }
+        catch(Exception ex)
+        {
+            throw;
+        }
+    }
+    protected async Task LoadTourLegs()
+    {
+        TourLegs = await TourLegRepository.GetForTour(Guid.Parse(TourId), page: new Pager()
+            {
+                Page = tourLegPage,
+                Size = 10
+            }, orderBy: q => q.OrderBy(tl => tl.Sequence));
     }
     string[]? ModelStyles = null;
     public async Task ModelChanged(string e)
@@ -160,6 +201,19 @@ else
         Request.Model = e;
         ModelStyles = Voices?.Single(v => v.ShortName == e).StyleList;
 
+    }
+    public async Task TourLegsPageBack(MouseEventArgs e)
+    {
+        if(tourLegPage > 1)
+        {
+            tourLegPage--;
+            await LoadTourLegs();
+        }
+    }
+    public async Task TourLegsPageForward(MouseEventArgs e)
+    {
+        tourLegPage++;
+        await LoadTourLegs();
     }
     public async Task RequestTTS()
     {

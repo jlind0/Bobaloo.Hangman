@@ -39,7 +39,7 @@ else
     IEnumerable<User>? Users;
     protected async override Task OnInitializedAsync()
     {
-        Users = await UsersRepository.Get();
+        Users = (await UsersRepository.Get()).Entities;
     }
     private async Task ToggleAdmin(string userId)
     {
@@ -48,7 +48,7 @@ else
         {
             user.IsAdmin = !user.IsAdmin;
             await UsersRepository.Update(user);
-            Users = await UsersRepository.Get();
+            Users = (await UsersRepository.Get()).Entities;
         }
     }
 }

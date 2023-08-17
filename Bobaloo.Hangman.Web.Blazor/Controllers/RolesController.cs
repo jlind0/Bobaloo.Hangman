@@ -22,6 +22,7 @@ namespace Bobaloo.Hangman.Web.Blazor.Controllers
         public class RoleBody
         {
             public string extension_Roles { get; set; } = null!;
+            public string? extension_Subscriptions { get; set; }
             public string version { get; set; } = "1.0.0";
             public string action { get; set; } = "continue";
         }
@@ -31,7 +32,11 @@ namespace Bobaloo.Hangman.Web.Blazor.Controllers
             Logger.LogInformation(JsonSerializer.Serialize(message));
 
             var userId = message.RootElement.GetProperty("objectId").GetString() ?? throw new InvalidDataException();
-            var user = await UsersRepository.GetByID(userId, token: token);
+            var user = await UsersRepository.GetByID(userId, properites: new EntityProperty[]
+            {
+                new EntityProperty("Subscriptions", true)
+            }, token: token);
+            List<string>? subscriptions = null;
             if(user == null)
             {
                 user = new User()
@@ -43,9 +48,13 @@ namespace Bobaloo.Hangman.Web.Blazor.Controllers
                 };
                 await UsersRepository.Add(user, token: token);
             }
+            else
+                subscriptions = user.Subscriptions?.Where(c => c.ValidFrom > DateTime.UtcNow).Select(c => c.TourId.ToString()).ToList();
+
             return new RoleBody()
             {
-                extension_Roles = user.IsAdmin ? "Tour.Admin" : "Tour.Subscriber"
+                extension_Roles = user.IsAdmin ? "Tour.Admin" : "Tour.Subscriber",
+                extension_Subscriptions = subscriptions != null ? string.Join(',', subscriptions) : null
             };
         }
     }

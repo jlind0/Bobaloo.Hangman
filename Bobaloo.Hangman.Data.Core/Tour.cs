@@ -22,7 +22,8 @@ public partial class Tour : Entity<Guid>
    
     public Point? StartingPoint { get; set; }
 
-    public virtual ICollection<TourLeg> TourLegs { get; set; } = new List<TourLeg>();
+    public virtual ICollection<TourLeg>? TourLegs { get; set; }
+    public virtual ICollection<Subscription>? Subscriptions { get; set; }
 }
 
 public class TourWithBinaryData : Tour

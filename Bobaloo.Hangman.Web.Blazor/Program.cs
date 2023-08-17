@@ -13,6 +13,7 @@ using Microsoft.Identity.Web.UI;
 using Bobaloo.Hangman.Business.Core;
 using Bobaloo.Hangman.Business;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Bobaloo.Hangman.Web.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,10 +48,10 @@ builder.Services.AddLogging();
 builder.Services.AddSingleton<IContextFactory, ContextFactory>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, Tour, Guid>, Repository<Tour, Guid>>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourWithBinaryData, Guid>, Repository<TourWithBinaryData, Guid>>();
-builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLeg, Guid>, Repository<TourLeg, Guid>>();
-builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, VoiceActor, int>, Repository<VoiceActor, int>>();
+builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLeg, Guid>, TourLegRepository>();
 builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, TourLegWithBinaryData, Guid>, Repository<TourLegWithBinaryData, Guid>>();
-builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, User, string>, Repository<User, string>>(); 
+builder.Services.AddSingleton<IRepository<HangmanUnitOfWork, User, string>, Repository<User, string>>();
+builder.Services.AddSingleton<ITourLegRepository<HangmanUnitOfWork>, TourLegRepository>();
 builder.Services.AddSingleton<IAzureTTS, AzureTTS>();
 builder.Services.AddSingleton<ITourBusiness, TourBusiness>();
 builder.Services.AddSingleton<ITourLegBusiness, TourLegBusiness>();

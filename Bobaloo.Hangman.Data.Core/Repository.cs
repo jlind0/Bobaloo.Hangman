@@ -61,7 +61,7 @@ namespace Bobaloo.Hangman.Data.Core
         where TEntity : Entity<TKey>, new()
         where TUnitOfWork : UnitOfWork
     {
-        Task<IEnumerable<TEntity>> Get(TUnitOfWork? work = null,
+        Task<RepositoryResultSet<TEntity, TKey>> Get(TUnitOfWork? work = null,
             Pager? page = null,
             Expression<Func<TEntity, bool>>? filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
