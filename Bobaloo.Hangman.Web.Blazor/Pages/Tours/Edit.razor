@@ -82,67 +82,40 @@
             <b>Please wait while your speech is generated.</b>
         }
     </EditForm>
-    @if (TourLegs != null)
-    {
-        <h2>Tour Legs</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Sequence</th>
-                    <th>Audio</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                @foreach (var tourLeg in TourLegs.Entities)
-                {
-                    <tr>
-                        <td><a href="/tours/legs/@tourLeg.TourLegId">@tourLeg.Name</a></td>
-                        <td>@tourLeg.Sequence</td>
-                        <td><a href="/api/audio/tours/legs/@tourLeg.TourLegId" target="_blank">Audio</a></td>
-                    </tr>
-                }
-        </tbody>
-        
-            
-    </table>
-    @if (TourLegs.Page != null)
-    {
-         <span>
-        @if (TourLegs.Page > 1)
-        {
-            
-                <button @onclick="TourLegsPageBack">&lt;</button>
+    <h2>Tour Legs</h2>
+    <TelerikGrid Pageable="true" Sortable="true" TItem="TourLeg" OnRead="GetTourLegs">
+        <GridColumns>
+            <GridColumn Title="Name">
+                <Template>
+                    <a href="/tours/legs/@(((TourLeg)context).TourLegId)">@(((TourLeg)context).Name)</a>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="Sequence"/>
+            <GridColumn Title="Audio">
+                <Template>
+                    <a target="_blank" href="/api/audio/tours/legs/@(((TourLeg)context).TourLegId)">Audio</a>
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </TelerikGrid>
+    <TelerikForm Model="NewTourLeg" OnValidSubmit="AddTourLeg">
+        <FormValidation>
+            <DataAnnotationsValidator/>
+        </FormValidation>
+        <FormItems>
+            <FormItem Field="Name" EditorType="FormEditorType.TextBox" />
+            <FormItem Field="Text" EditorType="FormEditorType.TextArea"/>
+            <FormItem Field="Sequence">
+                <Template>
+                    <TelerikNumericTextBox @bind-Value="@NewTourLeg.Sequence" />
+                </Template>
                 
-            
-        }
-        @if (tourLegPage < (TourLegs.Count / TourLegs.PageSize + 1))
-        {
-            <button @onclick="TourLegsPageForward">&gt;</button>
-        }
-        </span>
-    }
-    }
-    <EditForm Model="NewTourLeg" OnValidSubmit="AddTourLeg">
-        <DataAnnotationsValidator />
-        <div class="form-group">
-            <label for="NewTourLegName">Name</label>
-            <InputText id="NewTourLegName" @bind-Value="NewTourLeg.Name" />
-            <ValidationMessage For="@(() => NewTourLeg.Name)" />
-        </div>
-        <div class="form-group">
-            <label for="NewTourLegText">Text</label>
-            <InputTextArea id="NewTourLegText" style="width:100%;height:200px;" @bind-Value="NewTourLeg.Text" />
-            <ValidationMessage For="@(() => NewTourLeg.Text)" />
-        </div>
-        <div class="form-group">
-            <label for="NewTourLegSequence">Sequence</label>
-            <InputNumber id="NewTourLegSequence" @bind-Value="NewTourLeg.Sequence" />
-            <ValidationMessage For="@(() => NewTourLeg.Sequence)" />
-        </div>
-        <button type="submit" class="btn btn-primary">Add Tour Leg</button>
-    </EditForm>
+            </FormItem>
+        </FormItems>
+        <FormButtons>
+            <TelerikButton ButtonType="ButtonType.Submit">Add Tour Leg</TelerikButton>
+        </FormButtons>
+    </TelerikForm>
 }
 else
 {
@@ -167,53 +140,32 @@ else
     double? Latitude;
     double? Longitude;
     bool isInited = false;
-    RepositoryResultSet<TourLeg, Guid>? TourLegs;
-    int tourLegPage = 1;
-    int? tourLegCount;
-
+    public async Task GetTourLegs(GridReadEventArgs e)
+    {
+        var data = await TourLegRepository.GetForTour(Guid.Parse(TourId), page: new Pager()
+            {
+                Page = e.Request.Page,
+                Size = 10
+            }, orderBy: q => q.OrderBy(c => c.Sequence));
+        e.Data = data.Entities;
+        e.Total = data.Count ?? throw new InvalidOperationException();
+    }
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            Voices = (await TTS.GetVoices()).OrderBy(v => v.LocalName);
-            tour = await TourRepository.GetByID(Guid.Parse(TourId));
-            Latitude = tour?.StartingPoint?.X;
-            Longitude = tour?.StartingPoint?.Y;
-            await LoadTourLegs();
-            isInited = true;
-        }
-        catch(Exception ex)
-        {
-            throw;
-        }
+        
+        Voices = (await TTS.GetVoices()).OrderBy(v => v.LocalName);
+        tour = await TourRepository.GetByID(Guid.Parse(TourId));
+        Latitude = tour?.StartingPoint?.X;
+        Longitude = tour?.StartingPoint?.Y;
+        isInited = true;
     }
-    protected async Task LoadTourLegs()
-    {
-        TourLegs = await TourLegRepository.GetForTour(Guid.Parse(TourId), page: new Pager()
-            {
-                Page = tourLegPage,
-                Size = 10
-            }, orderBy: q => q.OrderBy(tl => tl.Sequence));
-    }
+    
     string[]? ModelStyles = null;
-    public async Task ModelChanged(string e)
+    public Task ModelChanged(string e)
     {
         Request.Model = e;
         ModelStyles = Voices?.Single(v => v.ShortName == e).StyleList;
-
-    }
-    public async Task TourLegsPageBack(MouseEventArgs e)
-    {
-        if(tourLegPage > 1)
-        {
-            tourLegPage--;
-            await LoadTourLegs();
-        }
-    }
-    public async Task TourLegsPageForward(MouseEventArgs e)
-    {
-        tourLegPage++;
-        await LoadTourLegs();
+        return Task.CompletedTask;
     }
     public async Task RequestTTS()
     {
@@ -243,6 +195,7 @@ else
         {
             var dotNetReference = DotNetObjectReference.Create(this);
             await JSRun.InvokeVoidAsync("SetDotNetObject", dotNetReference);
+            await JSRun.InvokeVoidAsync("loadBingMapsScript");
         }
     }
     [JSInvokable("ConfigureMap")]
@@ -253,9 +206,10 @@ else
         await JSRun.InvokeVoidAsync("GetMapForEditTour");
     }
     [JSInvokable("UpdateLatLong")]
-    public async Task UpdateLatLong(double lat, double lon)
+    public Task UpdateLatLong(double lat, double lon)
     {
         Latitude = lat;
         Longitude = lon;
+        return Task.CompletedTask;
     }
 }

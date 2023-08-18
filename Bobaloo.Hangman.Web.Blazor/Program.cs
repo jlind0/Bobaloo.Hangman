@@ -41,6 +41,7 @@ builder.Services.AddControllersWithViews();
 
 
 builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
+builder.Services.AddTelerikBlazor();
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
 builder.Services.AddSignalR();

@@ -133,6 +133,7 @@ else
         {
             var dotNetReference = DotNetObjectReference.Create(this);
             await JSRun.InvokeVoidAsync("SetDotNetObject", dotNetReference);
+            await JSRun.InvokeVoidAsync("loadBingMapsScript");
         }
     }
     [JSInvokable("ConfigureMap")]

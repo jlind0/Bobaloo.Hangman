@@ -2,7 +2,8 @@
 @attribute [Authorize(Policy = "IsAdmin")]
 @using Bobaloo.Hangman.Data.Core
 @using Bobaloo.Hangman.Data
-@inject IRepository<HangmanUnitOfWork, User, string> UsersRepository
+@using BUser = Bobaloo.Hangman.Data.Core.User
+@inject IRepository<HangmanUnitOfWork, BUser, string> UsersRepository
 <h3>Users</h3>
 @if (Users == null)
 {
@@ -36,7 +37,7 @@ else
 
 }
 @code {
-    IEnumerable<User>? Users;
+    IEnumerable<BUser>? Users;
     protected async override Task OnInitializedAsync()
     {
         Users = (await UsersRepository.Get()).Entities;

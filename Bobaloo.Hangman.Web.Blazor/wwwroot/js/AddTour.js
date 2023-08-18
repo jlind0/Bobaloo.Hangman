@@ -2,6 +2,23 @@ var map;
 var wayPointPin;
 var dotNetObject;
 var searchManager;
+window.bingMapsIsReady = false;
+
+function loadBingMapsScript() {
+    if (!window.bingMapsIsReady) {
+        var script = document.createElement('script');
+        script.src = 'https://www.bing.com/api/maps/mapcontrol?&key=ArIhGztSuytBopHCV1QFqR7Oze-s9xd94vmW9d_EoFv0GjdQQyH2fe7jEpo1-zfF';
+        script.async = true;
+        script.defer = true;
+        script.onload = function () {
+            window.bingMapsIsReady = true;
+            mapIsReady();
+        };
+        document.head.appendChild(script);
+    } else {
+        mapIsReady();
+    }
+}
 function mapIsReady() {
     if (dotNetObject === undefined)
         setTimeout(mapIsReady, 100);

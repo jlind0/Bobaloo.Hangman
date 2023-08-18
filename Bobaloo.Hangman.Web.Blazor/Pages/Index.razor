@@ -2,11 +2,7 @@
 @attribute [Authorize(Policy = "IsAdmin")]
 @using Bobaloo.Hangman.Data.Core
 @using Bobaloo.Hangman.Data
-@using Bobaloo.Hangman.Business.Core
-@using System.Security.Claims;
 @inject IRepository<HangmanUnitOfWork, Tour, Guid> TourRepository
-@inject ITourBusiness TourBusiness
-@inject ITourLegBusiness TourLegBusiness
 @inject IHttpContextAccessor Context
 <PageTitle>Bobaloo's Hangman Tours Adminstration Portal</PageTitle>
 
@@ -18,31 +14,24 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var tour in Tours)
-            {
-                <tr>
-                  <td><a href="/tours/@tour.TourId">@tour.Name</a></td>
-                  <td>@tour.Price.ToString("c")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <TelerikGrid Data="Tours" TItem="Tour" Pageable="true" Sortable="true" FilterMode="@GridFilterMode.FilterRow">
+        <GridColumns>
+            <GridColumn>
+                <Template>
+                    <a href="/tours/@(((Tour)context).TourId)">@(((Tour)context).Name)</a>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="Price" DisplayFormat="{0:C2}" />
+        </GridColumns>
+    </TelerikGrid>
     
 }
 @code{
     IEnumerable<Tour>? Tours;
-    Claim[]? Claims;
     protected override async Task OnInitializedAsync()
     {
         Tours = (await TourRepository.Get()).Entities;
 
     }
+    
 }
