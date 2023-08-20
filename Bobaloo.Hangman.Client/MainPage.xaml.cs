@@ -1,24 +1,16 @@
-﻿namespace Bobaloo.Hangman.Client
+﻿using Bobaloo.Hangman.ViewModels;
+using ReactiveUI.Maui;
+
+namespace Bobaloo.Hangman.Client
 {
-    public partial class MainPage : ContentPage
+    public partial class MainPage : ReactiveContentPage<MainWindowViewModel>
     {
-        int count = 0;
 
-        public MainPage()
+        public MainPage(MainWindowViewModel vm)
         {
+            ViewModel = vm;
             InitializeComponent();
-        }
-
-        private void OnCounterClicked(object sender, EventArgs e)
-        {
-            count++;
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            BindingContext = ViewModel;
         }
     }
 }

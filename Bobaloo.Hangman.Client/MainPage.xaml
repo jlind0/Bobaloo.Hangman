@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<r:ReactiveContentPage x:DataType="vm:MainWindowViewModel" x:TypeArguments="vm:MainWindowViewModel" xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:r="clr-namespace:ReactiveUI.Maui;assembly=ReactiveUI.Maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:telerik="http://schemas.telerik.com/2022/xaml/maui"
+             xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.ViewModels"
              x:Class="Bobaloo.Hangman.Client.MainPage">
 
     <ScrollView>
@@ -13,30 +15,15 @@
             <Image
                 Source="dotnet_bot.png"
                 SemanticProperties.Description="Cute dot net bot waving hi to you!"
-                HeightRequest="200"
-                HorizontalOptions="Center" />
-                
-            <Label
-                Text="Hello, World!"
-                SemanticProperties.HeadingLevel="Level1"
-                FontSize="32"
-                HorizontalOptions="Center" />
-            
-            <Label
-                Text="Welcome to Telerik UI for .NET MAUI"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Welcome to Telerik UI for dot net Multi platform App U I"
-                FontSize="18"
-                HorizontalOptions="Center" />
-
-            <telerik:RadButton
-                x:Name="CounterBtn"
-                Text="Click me"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
+                HeightRequest="200" IsVisible="{Binding IsLoggedIn}"
+                HorizontalOptions="Center">
+            </Image>
+            <telerik:RadButton x:Name="btnLogin"
+                Text="Login"
+                Command="{Binding Login}"
                 HorizontalOptions="Center" />
 
         </VerticalStackLayout>
     </ScrollView>
 
-</ContentPage>
+</r:ReactiveContentPage>

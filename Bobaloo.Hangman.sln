@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Business", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Business.Core", "Bobaloo.Hangman.Business.Core\Bobaloo.Hangman.Business.Core.csproj", "{DF70AFE6-BF17-482F-A684-B063DB0C6DF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bobaloo.Hangman.Client", "Bobaloo.Hangman.Client\Bobaloo.Hangman.Client.csproj", "{7D72A5B9-C7C0-426A-AF4B-FE124A6F7223}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bobaloo.Hangman.Client", "Bobaloo.Hangman.Client\Bobaloo.Hangman.Client.csproj", "{7D72A5B9-C7C0-426A-AF4B-FE124A6F7223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bobaloo.Hangman.ViewModels", "Bobaloo.Hangman.ViewModels\Bobaloo.Hangman.ViewModels.csproj", "{65C0B17A-E4C4-4B80-9F10-CD36A8F80B24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{7D72A5B9-C7C0-426A-AF4B-FE124A6F7223}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D72A5B9-C7C0-426A-AF4B-FE124A6F7223}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7D72A5B9-C7C0-426A-AF4B-FE124A6F7223}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{65C0B17A-E4C4-4B80-9F10-CD36A8F80B24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65C0B17A-E4C4-4B80-9F10-CD36A8F80B24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65C0B17A-E4C4-4B80-9F10-CD36A8F80B24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65C0B17A-E4C4-4B80-9F10-CD36A8F80B24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
