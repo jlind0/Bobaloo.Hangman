@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Telerik.Maui.Controls.Compatibility;
 using Microsoft.Identity.Client;
 using Bobaloo.Hangman.ViewModels;
+using Microsoft.Extensions.Logging;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 
@@ -21,6 +22,9 @@ namespace Bobaloo.Hangman.Client
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
+#if DEBUG
+            builder.Logging.AddDebug();
+#endif
             var a = Assembly.GetExecutingAssembly();
             using (var stream = a.GetManifestResourceStream("Bobaloo.Hangman.Client.appsettings.json"))
             {
