@@ -31,7 +31,13 @@ namespace Bobaloo.Hangman.Client
             {
                 return PublicClientApplicationBuilder.Create(builder.Configuration["AzureAD:ClientId"])
                 .WithB2CAuthority(builder.Configuration["AzureAD:Authority"])
+#if WINDOWS
                 .WithRedirectUri(builder.Configuration["AzureAD:RedirectURI"]) // needed only for the system browser
+#elif IOS
+                .WithRedirectUri(builder.Configuration["AzureAD:iOSRedirectURI"])
+#elif MACCATALYST
+                .WithRedirectUri(builder.Configuration["AzureAD:iOSRedirectURI"])
+#endif                
                 .Build();
 
             });
