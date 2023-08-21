@@ -46,6 +46,7 @@ namespace Bobaloo.Hangman.ViewModels
             }
             catch(Exception ex)
             {
+                await Alert.Handle(ex.Message).GetAwaiter();
                 await Alert.Handle(ex.StackTrace ?? "No stack trace").GetAwaiter();
                 Logger.LogError(ex, ex.Message);
             }
