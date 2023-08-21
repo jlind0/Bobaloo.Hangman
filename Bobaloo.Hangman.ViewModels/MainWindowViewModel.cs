@@ -41,8 +41,7 @@ namespace Bobaloo.Hangman.ViewModels
             try
             {
                 var result = await ClientApplication.AcquireTokenInteractive(new string[] { ApiScope })
-                            .WithPrompt(Prompt.SelectAccount).ExecuteAsync(token)
-                            .ConfigureAwait(false);
+                            .WithPrompt(Prompt.SelectAccount).ExecuteAsync(token);
                 IsLoggedIn = true;
             }
             catch(Exception ex)
