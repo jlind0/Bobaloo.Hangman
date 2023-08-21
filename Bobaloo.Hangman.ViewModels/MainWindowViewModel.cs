@@ -13,6 +13,7 @@ namespace Bobaloo.Hangman.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject
     {
+        public IDispatcherService DispatcherService { get; set; } = null!;
         protected IPublicClientApplication ClientApplication { get; }
         private bool isLoggedIn = false;
         public bool IsLoggedIn
@@ -34,7 +35,7 @@ namespace Bobaloo.Hangman.ViewModels
             var result = await ClientApplication.AcquireTokenInteractive(new string[] { ApiScope })
                         .WithPrompt(Prompt.SelectAccount).ExecuteAsync(token)
                         .ConfigureAwait(false);
-            IsLoggedIn = true;
+            await DispatcherService.Dispatch(() => IsLoggedIn = true);
         }
     }
 }
