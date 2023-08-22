@@ -9,13 +9,18 @@
     xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.ViewModels"
     xmlns:hangmanData="clr-namespace:Bobaloo.Hangman.Data;assembly=Bobaloo.Hangman.Data.Core"
     x:Class="Bobaloo.Hangman.Client.Views.ToursView">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <c:ByteToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
+        </ResourceDictionary>
+    </ContentView.Resources>
     <telerik:RadWrapLayout Margin="20" Orientation="Horizontal">
         <telerik:RadItemsControl x:Name="itmsTours" ItemsSource="{Binding Data}">
             <telerik:RadItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="hangmanData:Tour">
                     <HorizontalStackLayout Padding="10">
-                        <Image MaximumHeightRequest="100" MaximumWidthRequest="100"
-                                    Aspect="AspectFit" Loaded="Image_Loaded" />
+                        <telerik:RadButton CornerRadius="0" Padding="0"  BorderThickness="0" BorderWidth="0" MaximumHeightRequest="100"  MaximumWidthRequest="100" ImageSource="{Binding Thumbnail, 
+                                            Converter={StaticResource ByteArrayToImageSourceConverter}, Mode=OneWay}"/>
                         <VerticalStackLayout>
                             <Label Text="{Binding Name}"/>
                             <Label Text="{Binding Description}"/>
