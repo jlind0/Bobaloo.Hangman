@@ -41,6 +41,15 @@
 
         <button type="submit" class="btn btn-primary">Save</button>
     </EditForm>
+    <h3>Thumbnail</h3>
+    <TelerikUpload SaveUrl="@ThumbnailSaveUri" 
+        SaveField="file" WithCredentials="true" Multiple="false"
+                   AllowedExtensions="@AllowedFileTypes" MaxFileSize="@MaxFileSize" 
+                   OnSuccess="ThumbnailUploadFinished" />
+    @if(tour.Thumbnail != null)
+    {
+        <img src="data:image/jpeg;base64,@Convert.ToBase64String(tour.Thumbnail)"/>
+    }
     <a href="/api/audio/tours/@TourId" target="_blank">Listen to Intro Audio</a>
     <div id='searchBoxContainer'>
         <input type='text' id='searchBox' />
@@ -133,6 +142,7 @@ else
     }
     bool isRunningTTS = false;
     [Parameter] public string TourId { get; set; } = null!;
+    public string ThumbnailSaveUri { get; set; } = null!;
     private TourLeg NewTourLeg = new TourLeg();
     public TTSRequest Request = new TTSRequest();
     IEnumerable<VoiceInfo>? Voices;
@@ -140,6 +150,8 @@ else
     double? Latitude;
     double? Longitude;
     bool isInited = false;
+    private List<string> AllowedFileTypes { get; set; } = new List<string>() { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif" };
+    private int MaxFileSize = 10 * 1024 * 1024;
     public async Task GetTourLegs(GridReadEventArgs e)
     {
         var data = await TourLegRepository.GetForTour(Guid.Parse(TourId), page: new Pager()
@@ -150,9 +162,13 @@ else
         e.Data = data.Entities;
         e.Total = data.Count ?? throw new InvalidOperationException();
     }
+    public async Task ThumbnailUploadFinished(UploadSuccessEventArgs e)
+    {
+        tour = await TourRepository.GetByID(Guid.Parse(TourId));
+    }
     protected override async Task OnInitializedAsync()
     {
-        
+        ThumbnailSaveUri = $"/api/tours/thumbnail/{TourId}";
         Voices = (await TTS.GetVoices()).OrderBy(v => v.LocalName);
         tour = await TourRepository.GetByID(Guid.Parse(TourId));
         Latitude = tour?.StartingPoint?.X;

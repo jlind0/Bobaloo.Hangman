@@ -4,24 +4,38 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:telerik="http://schemas.telerik.com/2022/xaml/maui"
              xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.ViewModels"
+             xmlns:vw="clr-namespace:Bobaloo.Hangman.Client.Views"
              x:Class="Bobaloo.Hangman.Client.MainPage">
 
     <ScrollView>
+        
         <VerticalStackLayout
             Spacing="25" 
             Padding="30,0" 
             VerticalOptions="Center">
-
-            <Image
-                Source="dotnet_bot.png"
-                SemanticProperties.Description="Cute dot net bot waving hi to you!"
-                HeightRequest="200" IsVisible="{Binding IsLoggedIn}"
-                HorizontalOptions="Center">
-            </Image>
+            <telerik:RadBusyIndicator x:Name="BusyIndicator"
+                            AnimationContentHeightRequest="100"
+                            AnimationContentWidthRequest="100"
+                            AnimationContentColor="#674bb2"
+                            AutomationId="busyIndicator"
+                            IsBusy="{Binding IsLoading}">
+                <VerticalStackLayout IsVisible="{Binding IsLoggedIn}">
+                    <vw:ToursView BindingContext="{Binding Tours}" />
+                </VerticalStackLayout>
+            </telerik:RadBusyIndicator>
             <telerik:RadButton x:Name="btnLogin"
                 Text="Login"
                 Command="{Binding Login}"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center">
+                <telerik:RadButton.Triggers>
+                    <DataTrigger Binding="{Binding IsLoggedIn}" TargetType="telerik:RadButton" Value="True">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsLoggedIn}" TargetType="telerik:RadButton" Value="False">
+                        <Setter Property="IsVisible" Value="True"/>
+                    </DataTrigger>
+                </telerik:RadButton.Triggers>
+            </telerik:RadButton>
 
         </VerticalStackLayout>
     </ScrollView>

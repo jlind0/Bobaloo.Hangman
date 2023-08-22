@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Bobaloo.Hangman.Web.Authorization;
 using Bobaloo.Hangman.Business.Core;
+using Microsoft.Identity.Web.Resource;
 
 namespace Bobaloo.Hangman.Web.Controllers
 {

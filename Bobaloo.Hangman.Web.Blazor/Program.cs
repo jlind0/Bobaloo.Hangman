@@ -14,6 +14,7 @@ using Bobaloo.Hangman.Business.Core;
 using Bobaloo.Hangman.Business;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Bobaloo.Hangman.Web.Authorization;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +38,11 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddTokenAcquisition();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Clear();
+    options.JsonSerializerOptions.Converters.Add(new NetTopologySuite.IO.Converters.GeoJsonConverterFactory());
+});
 
 
 builder.Services.AddRazorPages().AddMicrosoftIdentityUI();

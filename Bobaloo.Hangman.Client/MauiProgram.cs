@@ -4,6 +4,9 @@ using Telerik.Maui.Controls.Compatibility;
 using Microsoft.Identity.Client;
 using Bobaloo.Hangman.ViewModels;
 using Microsoft.Extensions.Logging;
+using CommunityToolkit.Maui;
+using Bobaloo.Hangman.Data.Client;
+using Bobaloo.Hangman.Data;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 
@@ -15,7 +18,7 @@ namespace Bobaloo.Hangman.Client
         {
             var builder = MauiApp.CreateBuilder();
             builder
-                .UseTelerik()
+                .UseTelerik().UseMauiCommunityToolkit()
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
                 {
@@ -47,6 +50,8 @@ namespace Bobaloo.Hangman.Client
 
             });
             builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+            builder.Services.AddSingleton<IHttpClientFactory, RepositoryHttpClientFactory>();
+            builder.Services.AddSingleton<IRepositoryClient<Tour, Guid>, RepositoryClient<Tour, Guid>>();
             builder.Services.AddScoped<MainWindowViewModel>();
             builder.Services.AddTransient<MainPage>();
             return builder.Build();

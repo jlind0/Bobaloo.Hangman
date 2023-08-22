@@ -39,5 +39,14 @@ namespace Bobaloo.Hangman.Web.Authorization
             return false;
 
         }
+        public static bool IsAdmin(this ClaimsPrincipal? user)
+        {
+            if (user == null)
+                return false;
+            var roles = user.FindFirst("extension_Roles");
+            if (roles != null && roles.Value.Split(',').Any(c => c == "Tour.Admin"))
+                return true;
+            return false;
+        }
     }
 }
