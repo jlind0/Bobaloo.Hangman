@@ -27,7 +27,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>XSAppIconAssets</key>
-	<string>Assets.xcassets/appicon.appiconset</string>
+	<string>Assets.xcassets/hangman.appiconset</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.hangmantours.app</string>
 	<key>CFBundleDisplayName</key>
