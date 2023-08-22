@@ -10,7 +10,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 
 		<!-- Display name -->
-		<ApplicationTitle>Bobaloo.Hangman.Client</ApplicationTitle>
+		<ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.bobaloo.hangman.client</ApplicationId>
@@ -127,8 +127,5 @@
 	  <ProjectReference Include="..\Bobaloo.Hangman.ViewModels\Bobaloo.Hangman.ViewModels.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Update="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
-	</ItemGroup>
 
 </Project>
