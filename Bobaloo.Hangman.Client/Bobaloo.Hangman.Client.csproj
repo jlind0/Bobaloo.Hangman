@@ -37,49 +37,49 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-android|AnyCPU'">
-	  <ApplicationVersion>14</ApplicationVersion>
+	  <ApplicationVersion>15</ApplicationVersion>
 	  <ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 	  <ApplicationId>com.hangmantours.app</ApplicationId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-ios|AnyCPU'">
-	  <ApplicationVersion>14</ApplicationVersion>
+	  <ApplicationVersion>15</ApplicationVersion>
 	  <ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 	  <ApplicationId>com.hangmantours.app</ApplicationId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-maccatalyst|AnyCPU'">
-	  <ApplicationVersion>14</ApplicationVersion>
+	  <ApplicationVersion>15</ApplicationVersion>
 	  <ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 	  <ApplicationId>com.hangmantours.app</ApplicationId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-windows10.0.19041|AnyCPU'">
-	  <ApplicationVersion>14</ApplicationVersion>
+	  <ApplicationVersion>15</ApplicationVersion>
 	  <ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 	  <ApplicationId>com.hangmantours.app</ApplicationId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-android|AnyCPU'">
-	  <ApplicationVersion>14</ApplicationVersion>
+	  <ApplicationVersion>15</ApplicationVersion>
 	  <ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 	  <ApplicationId>com.hangmantours.app</ApplicationId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-ios|AnyCPU'">
-	  <ApplicationVersion>14</ApplicationVersion>
+	  <ApplicationVersion>15</ApplicationVersion>
 	  <ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 	  <ApplicationId>com.hangmantours.app</ApplicationId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-maccatalyst|AnyCPU'">
-	  <ApplicationVersion>14</ApplicationVersion>
+	  <ApplicationVersion>15</ApplicationVersion>
 	  <ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 	  <ApplicationId>com.hangmantours.app</ApplicationId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-windows10.0.19041|AnyCPU'">
-	  <ApplicationVersion>14</ApplicationVersion>
+	  <ApplicationVersion>15</ApplicationVersion>
 	  <ApplicationTitle>Hangman Tours by Bobaloo</ApplicationTitle>
 	  <ApplicationId>com.hangmantours.app</ApplicationId>
 	</PropertyGroup>
