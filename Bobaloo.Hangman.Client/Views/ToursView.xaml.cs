@@ -6,4 +6,9 @@ public partial class ToursView : ContentView
 	{
 		InitializeComponent();
 	}
+
+    private void Image_Loaded(object sender, EventArgs e)
+    {
+		((Image)sender).Focus();
+    }
 }

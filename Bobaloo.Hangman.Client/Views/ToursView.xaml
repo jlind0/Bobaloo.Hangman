@@ -19,7 +19,7 @@
             <telerik:RadItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="hangmanData:Tour">
                     <HorizontalStackLayout Padding="10">
-                        <Image MaximumHeightRequest="100" MaximumWidthRequest="100"
+                        <Image Loaded="Image_Loaded" MaximumHeightRequest="100" MaximumWidthRequest="100"
                                     Source="{Binding Thumbnail, 
                                             Converter={StaticResource ByteArrayToImageSourceConverter}, Mode=OneWay}" 
                                     Aspect="AspectFit" />
