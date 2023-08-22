@@ -1,4 +1,4 @@
-using CommunityToolkit.Maui.Alerts;
+using Bobaloo.Hangman.Data;
 
 namespace Bobaloo.Hangman.Client.Views;
 
@@ -11,7 +11,9 @@ public partial class ToursView : ContentView
 
     private void Image_Loaded(object sender, EventArgs e)
     {
-		this.DisplaySnackbar("Image loaded");
-		((Image)sender).Focus();
+		var img = (Image)sender;
+		var thumbnail = ((Tour)img.BindingContext).Thumbnail;
+		if(thumbnail != null)
+			img.Source = ImageSource.FromStream(() => new MemoryStream(thumbnail));
     }
 }
