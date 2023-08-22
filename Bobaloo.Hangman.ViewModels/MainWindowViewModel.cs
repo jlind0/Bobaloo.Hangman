@@ -1,10 +1,15 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Bobaloo.Hangman.Data;
+using Bobaloo.Hangman.Data.Client;
+using DynamicData;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Security.Principal;
 using System.Text;
@@ -25,24 +30,54 @@ namespace Bobaloo.Hangman.ViewModels
             get => isLoggedIn;
             set => this.RaiseAndSetIfChanged(ref isLoggedIn, value);
         }
-        public ICommand Login { get; }
+        private bool isLoading = false;
+        public bool IsLoading
+        {
+            get => isLoading;
+            set => this.RaiseAndSetIfChanged(ref isLoading, value);
+        }
+        public ReactiveCommand<Unit, Unit> Login { get; }
+        public ReactiveCommand<Unit, Unit> Load { get; }
         protected string ApiScope { get; }
         protected ILogger Logger { get; }
-        public MainWindowViewModel(IConfiguration config, IPublicClientApplication clientApplication, ILogger<MainWindowViewModel> logger)
+        protected IRepositoryClient<Tour, Guid> TourClient { get; }
+        public ToursViewModel Tours { get; }
+        public MainWindowViewModel(IConfiguration config, IPublicClientApplication clientApplication, 
+            ILogger<MainWindowViewModel> logger, IRepositoryClient<Tour, Guid> tourClient)
         {
             alert = new Interaction<string, bool>();
             ClientApplication = clientApplication;
             Logger = logger;
             Login = ReactiveCommand.CreateFromTask(DoLogin);
             ApiScope = config["MicrosoftGraph:Scopes"] ?? throw new InvalidDataException();
+            TourClient = tourClient;
+            Load = ReactiveCommand.CreateFromTask(DoLoad);
+            Tours = new ToursViewModel(tourClient, this);
         }
-        public async Task DoLogin(CancellationToken token = default)
+        protected async Task DoLoad(CancellationToken token = default)
+        {
+            try
+            {
+                IsLoading = true;
+                await Tours.Load.Execute().GetAwaiter();
+            }
+            catch(Exception ex)
+            {
+                await Alert.Handle(ex.Message).GetAwaiter();
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+        protected async Task DoLogin(CancellationToken token = default)
         {
             try
             {
                 var result = await ClientApplication.AcquireTokenInteractive(new string[] { ApiScope })
                             .WithPrompt(Prompt.SelectAccount).ExecuteAsync(token);
-                IsLoggedIn = true;
+                IsLoggedIn = !string.IsNullOrEmpty(result.AccessToken);
+                await DoLoad(token);
             }
             catch(Exception ex)
             {
