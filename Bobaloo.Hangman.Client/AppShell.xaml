@@ -3,7 +3,7 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:local="clr-namespace:Bobaloo.Hangman.Client"
        x:Class="Bobaloo.Hangman.Client.AppShell"
-       Title="AppShell">
+       Title="Hangman Tours by Bobaloo">
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
