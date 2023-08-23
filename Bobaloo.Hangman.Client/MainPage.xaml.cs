@@ -21,7 +21,7 @@ namespace Bobaloo.Hangman.Client
                     await DisplayAlert("Alert", interaction.Input, "OK");
                     interaction.SetOutput(true);
                 }).DisposeWith(d);
-                ViewModel.PlayFile.RegisterHandler(async interaction =>
+                ViewModel.PlayFile.RegisterHandler(interaction =>
                 {
                     soundPlayer.Source = FileMediaSource.FromFile(
                         Path.Join(FileSystem.CacheDirectory, interaction.Input));
