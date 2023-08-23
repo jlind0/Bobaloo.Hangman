@@ -114,10 +114,10 @@ namespace Bobaloo.Hangman.ViewModels
     {
         private readonly Interaction<FileSaverOptions, bool> _saveFile;
         private readonly Interaction<string, bool> _doesFileExist;
-        private readonly Interaction<string, Unit> _playFile;
+        
         public Interaction<FileSaverOptions, bool> SaveFile { get => _saveFile; }
         public Interaction<string, bool> DoesFileExist { get => _doesFileExist; }
-        public Interaction<string, Unit> PlayFile { get => _playFile; }
+        
         private readonly Tour _tour;
         public Guid TourId { get => _tour.TourId; } 
         public string Name { get => _tour.Name;} 
@@ -135,7 +135,7 @@ namespace Bobaloo.Hangman.ViewModels
             AudioProxy = audioProxy;
             _saveFile = new Interaction<FileSaverOptions, bool>();
             _doesFileExist = new Interaction<string, bool>();
-            _playFile = new Interaction<string, Unit>();
+            
             PlayIntroAudio = ReactiveCommand.CreateFromTask(DoFetchIntroAudio);
 
         }
@@ -154,7 +154,7 @@ namespace Bobaloo.Hangman.ViewModels
                             Data = data
                         }).GetAwaiter();
                 }
-                await PlayFile.Handle(fileName).GetAwaiter();
+                await ToursVM.Parent.PlayFile.Handle(fileName).GetAwaiter();
             }
             catch(Exception ex)
             {

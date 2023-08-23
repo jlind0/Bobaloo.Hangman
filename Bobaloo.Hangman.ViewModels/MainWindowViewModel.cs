@@ -20,6 +20,8 @@ namespace Bobaloo.Hangman.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject
     {
+        private readonly Interaction<string, Unit> _playFile;
+        public Interaction<string, Unit> PlayFile { get => _playFile; }
         private readonly Interaction<string, bool> alert;
         public Interaction<string, bool> Alert => alert;
         public IDispatcherService DispatcherService { get; set; } = null!;
@@ -55,6 +57,7 @@ namespace Bobaloo.Hangman.ViewModels
             TourClient = tourClient;
             Load = ReactiveCommand.CreateFromTask(DoLoad);
             Tours = new ToursViewModel(tourClient, this, config, AudioProxy);
+            _playFile = new Interaction<string, Unit>();
         }
         protected async Task DoLoad(CancellationToken token = default)
         {

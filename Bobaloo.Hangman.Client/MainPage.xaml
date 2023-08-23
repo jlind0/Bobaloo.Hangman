@@ -5,6 +5,7 @@
              xmlns:telerik="http://schemas.telerik.com/2022/xaml/maui"
              xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.ViewModels"
              xmlns:vw="clr-namespace:Bobaloo.Hangman.Client.Views"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="Bobaloo.Hangman.Client.MainPage">
 
     <ScrollView>
@@ -13,6 +14,7 @@
             Spacing="25" 
             Padding="30,0" 
             VerticalOptions="Center">
+            <toolkit:MediaElement x:Name="soundPlayer" IsVisible="False"/>
             <telerik:RadBusyIndicator x:Name="BusyIndicator"
                             AnimationContentHeightRequest="100"
                             AnimationContentWidthRequest="100"

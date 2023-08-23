@@ -35,13 +35,7 @@ public partial class TourView : ReactiveContentView<TourViewModel>
                 await FileSystem.AppPackageFileExistsAsync(
                     Path.Join(FileSystem.CacheDirectory, interaction.Input)));
         }).DisposeWith(Disposables);
-        ViewModel.PlayFile.RegisterHandler(async interaction =>
-        {
-            tourSound.Source = FileMediaSource.FromFile(
-                Path.Join(FileSystem.CacheDirectory, interaction.Input));
-            tourSound.Play();
-            interaction.SetOutput(Unit.Default);
-        }).DisposeWith(Disposables);
+        
         ViewModel.SaveFile.RegisterHandler(async interaction =>
         {
             using(var fs = new FileStream(Path.Join(FileSystem.CacheDirectory, interaction.Input.FileName), FileMode.Create, FileAccess.Write))
