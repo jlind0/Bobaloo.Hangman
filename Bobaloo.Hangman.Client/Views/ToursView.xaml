@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView x:DataType="vm:ToursViewModel"
+<r:ReactiveContentView x:DataType="vm:ToursViewModel" x:TypeArguments="vm:ToursViewModel" ViewModel="{Binding}"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:r="clr-namespace:ReactiveUI.Maui;assembly=ReactiveUI.Maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -7,7 +7,7 @@
     xmlns:c="clr-namespace:Bobaloo.Hangman.Client.Converters"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.ViewModels"
-    xmlns:hangmanData="clr-namespace:Bobaloo.Hangman.Data;assembly=Bobaloo.Hangman.Data.Core"
+    xmlns:v="clr-namespace:Bobaloo.Hangman.Client.Views"
     x:Class="Bobaloo.Hangman.Client.Views.ToursView">
     <ContentView.Resources>
         <ResourceDictionary>
@@ -17,17 +17,10 @@
     <telerik:RadWrapLayout Margin="20" Orientation="Horizontal">
         <telerik:RadItemsControl x:Name="itmsTours" ItemsSource="{Binding Data}">
             <telerik:RadItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="hangmanData:Tour">
-                    <HorizontalStackLayout Padding="10">
-                        <Image Aspect="AspectFit" HeightRequest="200" WidthRequest="200" Source="{Binding Thumbnail, 
-                                            Converter={StaticResource ByteArrayToImageSourceConverter}, Mode=OneWay}"/>
-                        <VerticalStackLayout>
-                            <Label Text="{Binding Name}"/>
-                            <Label Text="{Binding Description}"/>
-                        </VerticalStackLayout>
-                    </HorizontalStackLayout>
+                <DataTemplate x:DataType="vm:TourViewModel">
+                    <v:TourView BindingContext="{Binding}"/>
                 </DataTemplate>
             </telerik:RadItemsControl.ItemTemplate>
         </telerik:RadItemsControl>
     </telerik:RadWrapLayout>
-</ContentView>
+</r:ReactiveContentView>

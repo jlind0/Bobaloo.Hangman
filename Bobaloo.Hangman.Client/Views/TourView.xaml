@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<r:ReactiveContentView x:TypeArguments="vm:TourViewModel" x:DataType="vm:TourViewModel" ViewModel="{Binding}"
+xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+xmlns:r="clr-namespace:ReactiveUI.Maui;assembly=ReactiveUI.Maui"
+xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+xmlns:telerik="http://schemas.telerik.com/2022/xaml/maui"
+xmlns:c="clr-namespace:Bobaloo.Hangman.Client.Converters"
+xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.ViewModels"
+             x:Class="Bobaloo.Hangman.Client.Views.TourView">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <c:ByteToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
+        </ResourceDictionary>
+    </ContentView.Resources>
+    <HorizontalStackLayout Padding="10">
+        <Image Aspect="AspectFit" HeightRequest="150" WidthRequest="150" Source="{Binding Thumbnail, 
+                        Converter={StaticResource ByteArrayToImageSourceConverter}, Mode=OneWay}"/>
+        <VerticalStackLayout>
+            <Label FontSize="Large" Text="{Binding Name}" WidthRequest="150"/>
+            <Label Text="{Binding Description}" WidthRequest="150"/>
+            <telerik:RadButton x:Name="btnPlayIntro" Command="{Binding PlayIntroAudio}" Text="Hear Introduction"></telerik:RadButton>
+            <toolkit:MediaElement x:Name="tourSound" IsVisible="False"/>
+        </VerticalStackLayout>
+    </HorizontalStackLayout>
+</r:ReactiveContentView>

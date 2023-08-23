@@ -42,9 +42,11 @@ namespace Bobaloo.Hangman.ViewModels
         protected ILogger Logger { get; }
         protected IRepositoryClient<Tour, Guid> TourClient { get; }
         public ToursViewModel Tours { get; }
+        protected IAudioProxy AudioProxy { get; }
         public MainWindowViewModel(IConfiguration config, IPublicClientApplication clientApplication, 
-            ILogger<MainWindowViewModel> logger, IRepositoryClient<Tour, Guid> tourClient)
+            ILogger<MainWindowViewModel> logger, IRepositoryClient<Tour, Guid> tourClient, IAudioProxy audioProxy)
         {
+            AudioProxy = audioProxy;
             alert = new Interaction<string, bool>();
             ClientApplication = clientApplication;
             Logger = logger;
@@ -52,7 +54,7 @@ namespace Bobaloo.Hangman.ViewModels
             ApiScope = config["MicrosoftGraph:Scopes"] ?? throw new InvalidDataException();
             TourClient = tourClient;
             Load = ReactiveCommand.CreateFromTask(DoLoad);
-            Tours = new ToursViewModel(tourClient, this);
+            Tours = new ToursViewModel(tourClient, this, config, AudioProxy);
         }
         protected async Task DoLoad(CancellationToken token = default)
         {

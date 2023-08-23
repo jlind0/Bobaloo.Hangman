@@ -2,6 +2,7 @@
 using Bobaloo.Hangman.Data.Client;
 using Bobaloo.Hangman.Data.Core;
 using DynamicData;
+using Microsoft.Extensions.Configuration;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,12 @@ using System.Windows.Input;
 
 namespace Bobaloo.Hangman.ViewModels
 {
-    public abstract class RepositoryViewModel<TEntity, TKey> : ReactiveObject
+    public abstract class RepositoryViewModel<TEntity, TKey, TViewModel> : ReactiveObject
         where TEntity : Entity<TKey>, new()
+        where TViewModel: class
     {
         protected IRepositoryClient<TEntity, TKey> Repository { get; }
-        public ObservableCollection<TEntity> Data { get; } = new ObservableCollection<TEntity>();
+        public ObservableCollection<TViewModel> Data { get; } = new ObservableCollection<TViewModel>();
         public ReactiveCommand<Unit, Unit> Load { get; }
         public ReactiveCommand<int, Unit> LoadPage { get; }
         private bool isLoading = false;
@@ -46,13 +48,15 @@ namespace Bobaloo.Hangman.ViewModels
             get => page;
             set => this.RaiseAndSetIfChanged(ref page, value);
         }
-        protected MainWindowViewModel Parent { get; }
-        public RepositoryViewModel(IRepositoryClient<TEntity, TKey> repository, MainWindowViewModel parent)
+        public MainWindowViewModel Parent { get; }
+        protected IConfiguration Config { get; }
+        public RepositoryViewModel(IRepositoryClient<TEntity, TKey> repository, MainWindowViewModel parent, IConfiguration config)
         {
             Repository = repository;
             Parent = parent;
             Load = ReactiveCommand.CreateFromTask(DoLoad);
             LoadPage = ReactiveCommand.CreateFromTask<int>(DoLoadPage);
+            Config = config;
         }
         protected virtual async Task DoLoad(CancellationToken token = default)
         {
@@ -68,7 +72,7 @@ namespace Bobaloo.Hangman.ViewModels
                     }, token: token);
                     if (data != null)
                     {
-                        Data.AddRange(data.Entities);
+                        Data.AddRange(data.Entities.Select(FromEntity));
                         Count = data.Count ?? 0;
                         Page = data.Page ?? 1;
                     }
@@ -84,12 +88,78 @@ namespace Bobaloo.Hangman.ViewModels
             Page = page;
             await DoLoad(token);
         }
+        protected abstract TViewModel FromEntity(TEntity entity);
     }
-    public class ToursViewModel : RepositoryViewModel<Tour, Guid>
+    public class ToursViewModel : RepositoryViewModel<Tour, Guid, TourViewModel>
     {
-        public ToursViewModel(IRepositoryClient<Tour, Guid> repository, MainWindowViewModel parent) 
-            : base(repository, parent)
+        protected IAudioProxy AudioProxy { get; }
+        public ToursViewModel(IRepositoryClient<Tour, Guid> repository, 
+            MainWindowViewModel parent, IConfiguration config, IAudioProxy audioProxy) 
+            : base(repository, parent, config)
         {
+            AudioProxy = audioProxy;
+        }
+
+        protected override TourViewModel FromEntity(Tour entity)
+        {
+            return new TourViewModel(entity, Config, this, AudioProxy);
+        }
+    }
+    public class FileSaverOptions
+    {
+        public string FileName { get; set; } = null!;
+        public byte[] Data { get; set; } = null!;
+    }
+    public class TourViewModel : ReactiveObject
+    {
+        private readonly Interaction<FileSaverOptions, bool> _saveFile;
+        private readonly Interaction<string, bool> _doesFileExist;
+        private readonly Interaction<string, Unit> _playFile;
+        public Interaction<FileSaverOptions, bool> SaveFile { get => _saveFile; }
+        public Interaction<string, bool> DoesFileExist { get => _doesFileExist; }
+        public Interaction<string, Unit> PlayFile { get => _playFile; }
+        private readonly Tour _tour;
+        public Guid TourId { get => _tour.TourId; } 
+        public string Name { get => _tour.Name;} 
+        public string Description { get => _tour.Description; }
+        public byte[]? Thumbnail { get => _tour.Thumbnail; }
+        public ToursViewModel ToursVM { get; }
+        protected IConfiguration Config { get; }
+        protected IAudioProxy AudioProxy { get; }
+        public ReactiveCommand<Unit, Unit> PlayIntroAudio { get; }
+        public TourViewModel(Tour tour, IConfiguration config, ToursViewModel toursVM, IAudioProxy audioProxy)
+        {
+            _tour = tour;
+            ToursVM = toursVM;
+            Config = config;
+            AudioProxy = audioProxy;
+            _saveFile = new Interaction<FileSaverOptions, bool>();
+            _doesFileExist = new Interaction<string, bool>();
+            _playFile = new Interaction<string, Unit>();
+            PlayIntroAudio = ReactiveCommand.CreateFromTask(DoFetchIntroAudio);
+
+        }
+        protected async Task DoFetchIntroAudio(CancellationToken token = default)
+        {
+            try
+            {
+                var fileName = $"introaudio{TourId}.mp3";
+                if (!await DoesFileExist.Handle(fileName).GetAwaiter())
+                {
+                    var data = await AudioProxy.GetIntroAudio(TourId, token);
+                    if (data != null)
+                        await SaveFile.Handle(new FileSaverOptions()
+                        {
+                            FileName = fileName,
+                            Data = data
+                        }).GetAwaiter();
+                }
+                await PlayFile.Handle(fileName).GetAwaiter();
+            }
+            catch(Exception ex)
+            {
+                await ToursVM.Parent.Alert.Handle(ex.Message).GetAwaiter();
+            }
         }
     }
 }

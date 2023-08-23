@@ -31,8 +31,6 @@ namespace Bobaloo.Hangman.Web.Controllers
         [HttpGet("tours/{tourId}")]
         public async Task<IActionResult> GetTourAudio(Guid tourId, CancellationToken token = default)
         {
-            if (ContextAccessor.HttpContext?.User.HasSubscription(tourId) != true)
-                return Unauthorized();
             var tourData = await TourBusiness.GetIntroAudio(tourId, token);
             if(tourData != null)
                 return File(tourData, "audio/mpeg");
