@@ -19,7 +19,7 @@
             <telerik:RadItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="hangmanData:Tour">
                     <HorizontalStackLayout Padding="10">
-                        <telerik:RadButton CornerRadius="0" Padding="0"  BorderThickness="0" BorderWidth="0" MaximumHeightRequest="100"  MaximumWidthRequest="100" ImageSource="{Binding Thumbnail, 
+                        <Image Aspect="AspectFit" HeightRequest="200" WidthRequest="200" Source="{Binding Thumbnail, 
                                             Converter={StaticResource ByteArrayToImageSourceConverter}, Mode=OneWay}"/>
                         <VerticalStackLayout>
                             <Label Text="{Binding Name}"/>
