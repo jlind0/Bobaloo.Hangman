@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
 using Bobaloo.Hangman.Data.Client;
 using Bobaloo.Hangman.Data;
+using ReactiveUI.Maui;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 
@@ -18,7 +19,7 @@ namespace Bobaloo.Hangman.Client
         {
             var builder = MauiApp.CreateBuilder();
             builder
-                .UseTelerik().UseMauiCommunityToolkit()
+                .UseTelerik().UseMauiCommunityToolkit().UseMauiCommunityToolkitMediaElement()
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
                 {
@@ -52,6 +53,7 @@ namespace Bobaloo.Hangman.Client
             builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
             builder.Services.AddSingleton<IHttpClientFactory, RepositoryHttpClientFactory>();
             builder.Services.AddSingleton<IRepositoryClient<Tour, Guid>, RepositoryClient<Tour, Guid>>();
+            builder.Services.AddSingleton<IAudioProxy, AudioProxy>();
             builder.Services.AddScoped<MainWindowViewModel>();
             builder.Services.AddTransient<MainPage>();
             return builder.Build();
