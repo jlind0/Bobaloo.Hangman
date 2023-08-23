@@ -20,7 +20,6 @@ xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.View
             <Label FontSize="Large" Text="{Binding Name}" WidthRequest="150"/>
             <Label Text="{Binding Description}" WidthRequest="150"/>
             <telerik:RadButton x:Name="btnPlayIntro" Command="{Binding PlayIntroAudio}" Text="Hear Introduction"></telerik:RadButton>
-            <toolkit:MediaElement x:Name="tourSound" IsVisible="False"/>
         </VerticalStackLayout>
     </HorizontalStackLayout>
 </r:ReactiveContentView>
