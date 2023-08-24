@@ -47,28 +47,23 @@ namespace Bobaloo.Hangman.Client
                 .WithRedirectUri(builder.Configuration["AzureAD:iOSRedirectURI"])
 #endif                
                 .Build();
+
+#if WINDOWS || MACCATALYST
                 string fileName = Path.Join(FileSystem.CacheDirectory, "msal.token.cache2");
                 client.UserTokenCache.SetBeforeAccessAsync(async args =>
                 {
                     if (!(await FileSystem.Current.AppPackageFileExistsAsync(fileName)))
                         return;
                     byte[] fileBytes;
-                    try
+                    using (var stream = new FileStream(fileName, FileMode.Open))
                     {
-                        using (var stream = new FileStream(fileName, FileMode.Open))
+                        using (var memoryStream = new MemoryStream())
                         {
-                            using (var memoryStream = new MemoryStream())
-                            {
-                                await stream.CopyToAsync(memoryStream);
-                                fileBytes = memoryStream.ToArray();
-                            }
+                            await stream.CopyToAsync(memoryStream);
+                            fileBytes = memoryStream.ToArray();
                         }
-                        args.TokenCache.DeserializeMsalV3(fileBytes);
                     }
-                    catch(Exception ex)
-                    {
-                        throw;
-                    }
+                    args.TokenCache.DeserializeMsalV3(fileBytes);
                 });
                 client.UserTokenCache.SetAfterAccessAsync(async args =>
                 {
@@ -81,6 +76,7 @@ namespace Bobaloo.Hangman.Client
                         }
                     }
                 });
+#endif
                 return client;
 
             });
