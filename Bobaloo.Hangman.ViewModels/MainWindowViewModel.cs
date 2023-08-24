@@ -45,9 +45,11 @@ namespace Bobaloo.Hangman.ViewModels
         protected IRepositoryClient<Tour, Guid> TourClient { get; }
         public ToursViewModel Tours { get; }
         protected IAudioProxy AudioProxy { get; }
+        protected string SignInSignOutPolicy { get; }
         public MainWindowViewModel(IConfiguration config, IPublicClientApplication clientApplication, 
             ILogger<MainWindowViewModel> logger, IRepositoryClient<Tour, Guid> tourClient, IAudioProxy audioProxy)
         {
+            SignInSignOutPolicy = config["AzureAD:SignUpSignInPolicyId"] ?? throw new InvalidDataException();
             AudioProxy = audioProxy;
             alert = new Interaction<string, bool>();
             ClientApplication = clientApplication;
@@ -77,18 +79,43 @@ namespace Bobaloo.Hangman.ViewModels
         }
         protected async Task DoLogin(CancellationToken token = default)
         {
+            bool tryInteractive = false;
             try
             {
-                var result = await ClientApplication.AcquireTokenInteractive(new string[] { ApiScope })
-                            .WithPrompt(Prompt.SelectAccount).ExecuteAsync(token);
-                IsLoggedIn = !string.IsNullOrEmpty(result.AccessToken);
-                await DoLoad(token);
+                var accounts = (await ClientApplication.GetAccountsAsync(SignInSignOutPolicy)).ToList();
+                if (accounts.Any())
+                {
+                    var result = await ClientApplication.AcquireTokenSilent(new string[] { ApiScope }, accounts.First()).ExecuteAsync();
+                    IsLoggedIn = !string.IsNullOrEmpty(result.AccessToken);
+                    tryInteractive = !IsLoggedIn;
+                }
+                else
+                    tryInteractive = true;
+            }
+            catch (MsalUiRequiredException)
+            {
+                tryInteractive = true;
             }
             catch(Exception ex)
             {
                 await Alert.Handle(ex.Message).GetAwaiter();
-                Logger.LogError(ex, ex.Message);
             }
+            if (tryInteractive)
+            {
+                try
+                {
+                    var result = await ClientApplication.AcquireTokenInteractive(new string[] { ApiScope })
+                                .WithPrompt(Prompt.SelectAccount).ExecuteAsync(token);
+                    IsLoggedIn = !string.IsNullOrEmpty(result.AccessToken);
+                    
+                }
+                catch (Exception ex)
+                {
+                    await Alert.Handle(ex.Message).GetAwaiter();
+                }
+            }
+            if (IsLoggedIn)
+                await DoLoad(token);
         }
     }
 }

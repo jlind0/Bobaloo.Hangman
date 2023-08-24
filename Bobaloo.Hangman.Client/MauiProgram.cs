@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
 using Bobaloo.Hangman.Data.Client;
 using Bobaloo.Hangman.Data;
-using ReactiveUI.Maui;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 
@@ -37,7 +36,7 @@ namespace Bobaloo.Hangman.Client
             }
             builder.Services.AddSingleton(provider =>
             {
-                return PublicClientApplicationBuilder.Create(builder.Configuration["AzureAD:ClientId"])
+                var client = PublicClientApplicationBuilder.Create(builder.Configuration["AzureAD:ClientId"])
                 .WithB2CAuthority(builder.Configuration["AzureAD:Authority"])
 #if WINDOWS
                 .WithRedirectUri(builder.Configuration["AzureAD:RedirectURI"]) // needed only for the system browser
@@ -48,6 +47,41 @@ namespace Bobaloo.Hangman.Client
                 .WithRedirectUri(builder.Configuration["AzureAD:iOSRedirectURI"])
 #endif                
                 .Build();
+                string fileName = Path.Join(FileSystem.CacheDirectory, "msal.token.cache2");
+                client.UserTokenCache.SetBeforeAccessAsync(async args =>
+                {
+                    if (!(await FileSystem.Current.AppPackageFileExistsAsync(fileName)))
+                        return;
+                    byte[] fileBytes;
+                    try
+                    {
+                        using (var stream = new FileStream(fileName, FileMode.Open))
+                        {
+                            using (var memoryStream = new MemoryStream())
+                            {
+                                await stream.CopyToAsync(memoryStream);
+                                fileBytes = memoryStream.ToArray();
+                            }
+                        }
+                        args.TokenCache.DeserializeMsalV3(fileBytes);
+                    }
+                    catch(Exception ex)
+                    {
+                        throw;
+                    }
+                });
+                client.UserTokenCache.SetAfterAccessAsync(async args =>
+                {
+                    if (args.HasStateChanged)
+                    {
+                        var data = args.TokenCache.SerializeMsalV3();
+                        using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                        {
+                            await fs.WriteAsync(data, 0, data.Length);
+                        }
+                    }
+                });
+                return client;
 
             });
             builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
@@ -59,4 +93,5 @@ namespace Bobaloo.Hangman.Client
             return builder.Build();
         }
     }
+   
 }
