@@ -31,9 +31,11 @@ public partial class TourView : ReactiveContentView<TourViewModel>
     {
         ViewModel.DoesFileExist.RegisterHandler(async interaction =>
         {
-            interaction.SetOutput(
-                await FileSystem.AppPackageFileExistsAsync(
-                    Path.Join(FileSystem.CacheDirectory, interaction.Input)));
+            bool doesExist = await FileSystem.AppPackageFileExistsAsync(
+                    Path.Join(FileSystem.CacheDirectory, interaction.Input));
+            if (doesExist && File.GetLastWriteTimeUtc(Path.Join(FileSystem.CacheDirectory, interaction.Input)) < DateTime.UtcNow.AddDays(-1))
+                doesExist = false;
+            interaction.SetOutput(doesExist);
         }).DisposeWith(Disposables);
         
         ViewModel.SaveFile.RegisterHandler(async interaction =>

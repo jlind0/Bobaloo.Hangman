@@ -6,15 +6,25 @@
              xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.ViewModels"
              xmlns:vw="clr-namespace:Bobaloo.Hangman.Client.Views"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:c="clr-namespace:Bobaloo.Hangman.Client.Converters"
              x:Class="Bobaloo.Hangman.Client.MainPage">
-
-    <ScrollView>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <c:MediaEventArgsConverter x:Key="MediaEventArgsConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+<ScrollView>
         
         <VerticalStackLayout
             Spacing="25" 
             Padding="30,0" 
             VerticalOptions="Center">
-            <toolkit:MediaElement x:Name="soundPlayer" IsVisible="False"/>
+            <toolkit:MediaElement x:Name="soundPlayer" IsVisible="False" MediaEnded="soundPlayer_MediaEnded">
+                <toolkit:MediaElement.Behaviors>
+                    <toolkit:EventToCommandBehavior EventName="StateChanged" Command="{Binding ChangePlay}"
+                            EventArgsConverter="{StaticResource MediaEventArgsConverter}"/>
+                </toolkit:MediaElement.Behaviors>
+            </toolkit:MediaElement>
             <telerik:RadBusyIndicator x:Name="BusyIndicator"
                             AnimationContentHeightRequest="100"
                             AnimationContentWidthRequest="100"

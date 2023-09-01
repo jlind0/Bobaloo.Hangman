@@ -11,15 +11,89 @@ xmlns:vm="clr-namespace:Bobaloo.Hangman.ViewModels;assembly=Bobaloo.Hangman.View
     <ContentView.Resources>
         <ResourceDictionary>
             <c:ByteToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
+            <c:PixelScaler x:Key="PixelScaler"/>
         </ResourceDictionary>
     </ContentView.Resources>
-    <HorizontalStackLayout Padding="10">
-        <Image Aspect="AspectFit" HeightRequest="150" WidthRequest="150" Source="{Binding Thumbnail, 
+    <telerik:RadWrapLayout Padding="10">
+        <Image Aspect="AspectFit" 
+               HeightRequest="{Binding ToursVM.Parent.ScreenHeight, Converter={StaticResource PixelScaler}, ConverterParameter={x:Double 0.25}}" 
+               WidthRequest="{Binding ToursVM.Parent.ScreenWidth, Converter={StaticResource PixelScaler}, ConverterParameter={x:Double 0.25}}" Source="{Binding Thumbnail, 
                         Converter={StaticResource ByteArrayToImageSourceConverter}, Mode=OneWay}"/>
         <VerticalStackLayout>
-            <Label FontSize="Large" Text="{Binding Name}" WidthRequest="150"/>
-            <Label Text="{Binding Description}" WidthRequest="150"/>
-            <telerik:RadButton x:Name="btnPlayIntro" Command="{Binding PlayIntroAudio}" Text="Hear Introduction"></telerik:RadButton>
+            <Label FontSize="Large" Text="{Binding Name}" LineBreakMode="WordWrap" WidthRequest="{Binding ToursVM.Parent.ScreenWidth, Converter={StaticResource PixelScaler}, ConverterParameter={x:Double 0.8}}"/>
+            <Label Text="{Binding Description}" LineBreakMode="WordWrap" WidthRequest="{Binding ToursVM.Parent.ScreenWidth, Converter={StaticResource PixelScaler}, ConverterParameter={x:Double 0.8}}"/>
+            <HorizontalStackLayout>
+                <telerik:RadButton x:Name="btnPlayIntro" Command="{Binding PlayIntroAudio}" IsVisible="False">
+                    <telerik:RadButton.Style>
+                        <Style TargetType="telerik:RadButton">
+                            <Style.Triggers>
+                                <DataTrigger TargetType="telerik:RadButton"  Binding="{Binding TourPlayerState}" Value="Stopped">
+                                    <Setter Property="IsVisible" Value="True"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="telerik:RadButton"  Binding="{Binding TourPlayerState}" Value="Playing">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="telerik:RadButton"  Binding="{Binding TourPlayerState}" Value="Paused">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+
+                        </Style>
+                    </telerik:RadButton.Style>
+                    <telerik:RadButton.ImageSource>
+                        <FontImageSource Glyph="&#xf04b;"
+            FontFamily="FASolid"
+            Size="40" Color="Blue" />
+                    </telerik:RadButton.ImageSource>
+                </telerik:RadButton>
+                <telerik:RadButton x:Name="btnPauseIntro" Command="{Binding PauseIntroAudio}" IsVisible="False">
+                    <telerik:RadButton.Style>
+                        <Style TargetType="telerik:RadButton">
+                            <Style.Triggers>
+                                <DataTrigger TargetType="telerik:RadButton"  Binding="{Binding TourPlayerState}" Value="Stopped">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="telerik:RadButton"  Binding="{Binding TourPlayerState}" Value="Playing">
+                                    <Setter Property="IsVisible" Value="True"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="telerik:RadButton"  Binding="{Binding TourPlayerState}" Value="Paused">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                            
+                        </Style>
+                    </telerik:RadButton.Style>
+                    <telerik:RadButton.ImageSource>
+                        <FontImageSource Glyph="&#xf04c;"
+                            FontFamily="FASolid"
+                            Size="40" Color="Blue" />
+                    </telerik:RadButton.ImageSource>
+                </telerik:RadButton>
+                <telerik:RadButton x:Name="btnContinueIntro" Command="{Binding ContinueIntroAudio}" IsVisible="False">
+                    <telerik:RadButton.Style>
+                        <Style TargetType="telerik:RadButton">
+                            <Style.Triggers>
+                                <DataTrigger TargetType="telerik:RadButton" Binding="{Binding TourPlayerState}" Value="Stopped">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger  TargetType="telerik:RadButton" Binding="{Binding TourPlayerState}" Value="Playing">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger  TargetType="telerik:RadButton"  Binding="{Binding TourPlayerState}" Value="Paused">
+                                    <Setter Property="IsVisible" Value="True"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+
+                        </Style>
+                    </telerik:RadButton.Style>
+                    <telerik:RadButton.ImageSource>
+                        <FontImageSource Glyph="&#xe22f;"
+            FontFamily="FASolid"
+            Size="40" Color="Blue" />
+                    </telerik:RadButton.ImageSource>
+                </telerik:RadButton>
+            </HorizontalStackLayout>
+            
         </VerticalStackLayout>
-    </HorizontalStackLayout>
+    </telerik:RadWrapLayout>
 </r:ReactiveContentView>

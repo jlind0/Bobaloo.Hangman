@@ -20,8 +20,31 @@ namespace Bobaloo.Hangman.ViewModels
 {
     public class MainWindowViewModel : ReactiveObject
     {
+        private PlayerState playerState = PlayerState.Stopped;
+        public PlayerState PlayerState
+        {
+            get => playerState;
+            set => this.RaiseAndSetIfChanged(ref playerState, value);
+        }
+        private double screenWidth;
+        public double ScreenWidth
+        {
+            get => screenWidth;
+            set => this.RaiseAndSetIfChanged(ref screenWidth, value);
+        }
+        private double screenHeight;
+        public double ScreenHeight
+        {
+            get => screenHeight;
+            set => this.RaiseAndSetIfChanged(ref screenHeight, value);
+        }
         private readonly Interaction<string, Unit> _playFile;
         public Interaction<string, Unit> PlayFile { get => _playFile; }
+        private readonly Interaction<PlayerState, Unit> changePlayerState;
+        public Interaction<PlayerState, Unit> ChangePlayerState
+        {
+            get => changePlayerState;
+        }
         private readonly Interaction<string, bool> alert;
         public Interaction<string, bool> Alert => alert;
         public IDispatcherService DispatcherService { get; set; } = null!;
@@ -38,8 +61,15 @@ namespace Bobaloo.Hangman.ViewModels
             get => isLoading;
             set => this.RaiseAndSetIfChanged(ref isLoading, value);
         }
+        private string? currentPlayFile = null;
+        public string? CurrentPlayFile
+        {
+            get => currentPlayFile;
+            set => this.RaiseAndSetIfChanged(ref  currentPlayFile, value);
+        }
         public ReactiveCommand<Unit, Unit> Login { get; }
         public ReactiveCommand<Unit, Unit> Load { get; }
+        public ReactiveCommand<PlayerState, Unit> ChangePlay { get; }
         protected string ApiScope { get; }
         protected ILogger Logger { get; }
         protected IRepositoryClient<Tour, Guid> TourClient { get; }
@@ -60,6 +90,13 @@ namespace Bobaloo.Hangman.ViewModels
             Load = ReactiveCommand.CreateFromTask(DoLoad);
             Tours = new ToursViewModel(tourClient, this, config, AudioProxy);
             _playFile = new Interaction<string, Unit>();
+            ChangePlay = ReactiveCommand.CreateFromTask<PlayerState>(DoChangePlay);
+            changePlayerState = new Interaction<PlayerState, Unit>();
+        }
+        protected Task DoChangePlay(PlayerState state, CancellationToken token = default)
+        {
+            PlayerState = state;
+            return Task.CompletedTask;
         }
         protected async Task DoLoad(CancellationToken token = default)
         {
@@ -85,7 +122,7 @@ namespace Bobaloo.Hangman.ViewModels
                 var accounts = (await ClientApplication.GetAccountsAsync(SignInSignOutPolicy)).ToList();
                 if (accounts.Any())
                 {
-                    var result = await ClientApplication.AcquireTokenSilent(new string[] { ApiScope }, accounts.First()).ExecuteAsync();
+                    var result = await ClientApplication.AcquireTokenSilent(new string[] { ApiScope }, accounts.First()).ExecuteAsync(token);
                     IsLoggedIn = !string.IsNullOrEmpty(result.AccessToken);
                     tryInteractive = !IsLoggedIn;
                 }
@@ -117,5 +154,11 @@ namespace Bobaloo.Hangman.ViewModels
             if (IsLoggedIn)
                 await DoLoad(token);
         }
+    }
+    public enum PlayerState
+    {
+        Stopped,
+        Playing,
+        Paused
     }
 }

@@ -2,6 +2,7 @@
 using Bobaloo.Hangman.Data.Client;
 using Bobaloo.Hangman.Data.Core;
 using DynamicData;
+using DynamicData.Binding;
 using Microsoft.Extensions.Configuration;
 using ReactiveUI;
 using System;
@@ -127,34 +128,68 @@ namespace Bobaloo.Hangman.ViewModels
         protected IConfiguration Config { get; }
         protected IAudioProxy AudioProxy { get; }
         public ReactiveCommand<Unit, Unit> PlayIntroAudio { get; }
+        public ReactiveCommand<Unit, Unit> PauseIntroAudio { get; }
+        public ReactiveCommand<Unit, Unit> ContinueIntroAudio { get; }
+        protected string FileName { get; }
+        private PlayerState playerState = PlayerState.Stopped;
+        public PlayerState TourPlayerState
+        {
+            get => playerState;
+            set => this.RaiseAndSetIfChanged(ref playerState, value);
+        }
         public TourViewModel(Tour tour, IConfiguration config, ToursViewModel toursVM, IAudioProxy audioProxy)
         {
+            
             _tour = tour;
             ToursVM = toursVM;
             Config = config;
             AudioProxy = audioProxy;
             _saveFile = new Interaction<FileSaverOptions, bool>();
             _doesFileExist = new Interaction<string, bool>();
-            
+            FileName = $"introaudio{TourId}.mp3";
             PlayIntroAudio = ReactiveCommand.CreateFromTask(DoFetchIntroAudio);
-
+            PauseIntroAudio = ReactiveCommand.CreateFromTask(DoPauseIntroAudio);
+            ContinueIntroAudio = ReactiveCommand.CreateFromTask(DoContinueIntroAudio);
+            ToursVM.Parent.WhenPropertyChanged(p => p.PlayerState).Subscribe(v =>
+            {
+                if (ToursVM.Parent.CurrentPlayFile == FileName)
+                    TourPlayerState = v.Value;
+                else
+                    TourPlayerState = PlayerState.Stopped;
+            });
+            ToursVM.Parent.WhenPropertyChanged(p => p.CurrentPlayFile).Subscribe(v =>
+            {
+                if (v.Value != FileName)
+                    TourPlayerState = PlayerState.Stopped;
+            });
+        }
+        protected async Task DoContinueIntroAudio(CancellationToken token = default)
+        {
+            TourPlayerState = PlayerState.Playing;
+            await ToursVM.Parent.ChangePlayerState.Handle(PlayerState.Playing).GetAwaiter();
+        }
+        protected async Task DoPauseIntroAudio(CancellationToken token = default)
+        {
+            TourPlayerState = PlayerState.Paused;
+            await ToursVM.Parent.ChangePlayerState.Handle(PlayerState.Paused).GetAwaiter();
         }
         protected async Task DoFetchIntroAudio(CancellationToken token = default)
         {
             try
             {
-                var fileName = $"introaudio{TourId}.mp3";
-                if (!await DoesFileExist.Handle(fileName).GetAwaiter())
+                if (!await DoesFileExist.Handle(FileName).GetAwaiter())
                 {
                     var data = await AudioProxy.GetIntroAudio(TourId, token);
                     if (data != null)
                         await SaveFile.Handle(new FileSaverOptions()
                         {
-                            FileName = fileName,
+                            FileName = FileName,
                             Data = data
                         }).GetAwaiter();
                 }
-                await ToursVM.Parent.PlayFile.Handle(fileName).GetAwaiter();
+                ToursVM.Parent.CurrentPlayFile = FileName;
+                TourPlayerState = PlayerState.Playing;
+                await ToursVM.Parent.PlayFile.Handle(FileName).GetAwaiter();
             }
             catch(Exception ex)
             {
